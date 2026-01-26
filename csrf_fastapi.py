@@ -235,7 +235,10 @@ def get_csrf_config() -> dict:
     # Default exempt paths - API endpoints use API key authentication
     # /setup is exempt because it's the initial setup before any session exists
     # /auth/login is exempt because the session doesn't exist yet for CSRF validation
-    exempt_paths = ["/api/v1/", "/setup", "/auth/login"]
+    # /socket.io/ is exempt because Socket.IO uses its own authentication mechanism
+    # /historify/api/ is exempt because it's internal API with session auth
+    # /auth/ is exempt because auth endpoints handle their own validation
+    exempt_paths = ["/api/v1/", "/setup", "/auth/", "/socket.io/", "/historify/api/"]
     
     # Add webhook paths if configured (webhooks use their own auth)
     webhook_paths = os.getenv("CSRF_EXEMPT_WEBHOOK_PATHS", "")

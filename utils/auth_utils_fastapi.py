@@ -74,7 +74,7 @@ def handle_auth_success_fastapi(
         
         # Initialize broker status
         init_broker_status(broker)
-        update_status(broker, "connected")
+        update_status(broker, "connected", "Broker connected successfully")
         
         logger.info(f"Authentication successful for user {user_session_key} with broker {broker}")
         

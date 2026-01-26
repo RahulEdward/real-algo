@@ -18,6 +18,39 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 
+// RealAlgo Logo Component - Trading chart with "R" stylized
+function RealAlgoLogo({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Background circle */}
+      <circle cx="16" cy="16" r="15" fill="currentColor" className="text-primary" />
+      {/* Trading chart line - upward trend */}
+      <path
+        d="M6 22 L10 18 L14 20 L18 12 L22 14 L26 8"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      {/* Arrow head for upward trend */}
+      <path
+        d="M23 8 L26 8 L26 11"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </svg>
+  )
+}
+
 export function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -76,7 +109,7 @@ export function Navbar() {
                 className="flex items-center gap-2 px-2"
                 onClick={() => setMobileOpen(false)}
               >
-                <img src="/logo.png" alt="RealAlgo" className="h-8 w-8" />
+                <RealAlgoLogo className="h-8 w-8" />
                 <span className="font-semibold">RealAlgo</span>
               </Link>
               <nav className="flex flex-col gap-1">
@@ -104,7 +137,7 @@ export function Navbar() {
 
         {/* Logo */}
         <Link to="/dashboard" className="flex items-center gap-2 mr-6">
-          <img src="/logo.png" alt="RealAlgo" className="h-8 w-8" />
+          <RealAlgoLogo className="h-8 w-8" />
           <span className="hidden font-semibold sm:inline-block">RealAlgo</span>
         </Link>
 
@@ -191,7 +224,7 @@ export function Navbar() {
                 aria-label="Open user menu"
               >
                 <span className="text-sm font-medium">
-                  {user?.username?.[0]?.toUpperCase() || 'O'}
+                  {user?.username?.[0]?.toUpperCase() || 'R'}
                 </span>
               </Button>
             </DropdownMenuTrigger>
@@ -206,17 +239,6 @@ export function Navbar() {
                   {item.label}
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuItem asChild>
-                <a
-                  href="https://docs.realalgo.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Docs
-                </a>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}
