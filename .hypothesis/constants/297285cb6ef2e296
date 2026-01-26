@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\csrf_fastapi.py
+# hypothesis_version: 6.149.1
+
+[400, ',', '/api/v1/', 'CSRF_ENABLED', 'GET', 'HEAD', 'OPTIONS', 'TRACE', 'TRUE', 'X-CSRF-Token', 'content-type', 'csrf_token', 'detail', 'enabled', 'exempt_paths', 'multipart/form-data']

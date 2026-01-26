@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\platforms.py
+# hypothesis_version: 6.149.1
+
+['/', '/platforms', 'platforms', 'platforms.html', 'request', 'templates']

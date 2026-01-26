@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\gc_json.py
+# hypothesis_version: 6.149.1
+
+[400, 404, 500, '/', '/gocharting', 'API key not found', 'GoCharting', 'HOST_SERVER', 'MARKET', 'Symbol not found', 'action', 'apikey', 'error', 'exchange', 'gc_json', 'gocharting.html', 'host', 'pricetype', 'product', 'quantity', 'request', 'strategy', 'symbol', 'templates', 'user']

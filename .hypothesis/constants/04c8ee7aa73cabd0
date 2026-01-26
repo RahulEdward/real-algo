@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\utils\httpx_client.py
+# hypothesis_version: 6.149.1
+
+[120.0, 1000, '\'"', 'APP_MODE', 'Closed HTTP client', 'DELETE', 'GET', 'POST', 'PUT', 'integrated', 'latency_tracker', 'request', 'response', 'standalone', 'start_time']

@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\services\history_service.py
+# hypothesis_version: 6.149.1
+
+[200, 400, 403, 404, 500, '%Y-%m-%d', '__code__', 'api', 'close', 'data', 'db', 'error', 'high', 'low', 'message', 'oi', 'open', 'records', 'status', 'success', 'timestamp', 'volume']

@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "realalgo",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

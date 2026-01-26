@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\utils\session.py
+# hypothesis_version: 6.149.1
+
+[401, '03:00', ':', 'Accept', 'Asia/Kolkata', 'SESSION_EXPIRY_TIME', 'UTC', 'X-Requested-With', 'XMLHttpRequest', 'application/json', 'auth.login', 'error', 'logged_in', 'login_time', 'message', 'session_expired', 'status', 'user']

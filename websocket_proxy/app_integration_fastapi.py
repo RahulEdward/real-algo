@@ -1,0 +1,275 @@
+# websocket_proxy/app_integration_fastapi.py
+"""
+FastAPI WebSocket Proxy Integration for RealAlgo
+
+This module provides WebSocket proxy server integration for FastAPI applications.
+It replaces the Flask-specific app_integration.py with FastAPI-compatible code.
+
+Requirements: 6.3 (WebSocket Proxy Integration)
+"""
+
+import asyncio
+import atexit
+import os
+import platform
+import signal
+import sys
+import threading
+
+from utils.logging import get_logger, highlight_url
+
+from .server import main as websocket_main
+
+# Set the correct event loop policy for Windows to avoid ZeroMQ warnings
+if platform.system() == "Windows":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+# Global flag to track if the WebSocket server has been started
+# Used to prevent multiple instances
+_websocket_server_started = False
+_websocket_proxy_instance = None
+_websocket_thread = None
+
+logger = get_logger(__name__)
+
+
+def should_start_websocket() -> bool:
+    """
+    Determine if the current process should start the WebSocket server.
+
+    In FastAPI with uvicorn reload mode, we only want to start the
+    WebSocket server in the main process, not the reloader process.
+
+    Returns:
+        bool: True if we should start the WebSocket server, False otherwise
+    """
+    # Check for uvicorn reload mode
+    # When uvicorn runs with --reload, it sets this environment variable
+    if os.environ.get("UVICORN_RELOAD", "").lower() in ("1", "true"):
+        # In reload mode, check if we're in the main process
+        # The reloader spawns a subprocess that actually runs the app
+        return os.environ.get("UVICORN_STARTED") == "true"
+
+    # Check for Flask debug mode (for backwards compatibility)
+    if os.environ.get("FLASK_DEBUG", "").lower() in ("1", "true"):
+        return os.environ.get("WERKZEUG_RUN_MAIN") == "true"
+
+    # In non-debug/non-reload mode, always start
+    return True
+
+
+def cleanup_websocket_server():
+    """Clean up WebSocket server resources - cross-platform compatible"""
+    global _websocket_proxy_instance, _websocket_thread
+
+    try:
+        logger.info("Cleaning up WebSocket server...")
+
+        if _websocket_proxy_instance:
+            # For Windows compatibility, set a shutdown flag instead of trying to
+            # manipulate the event loop from a different thread
+            _websocket_proxy_instance.running = False
+
+            # Try to close the server gracefully
+            try:
+                if (
+                    hasattr(_websocket_proxy_instance, "server")
+                    and _websocket_proxy_instance.server
+                ):
+                    try:
+                        _websocket_proxy_instance.server.close()
+                    except Exception as e:
+                        logger.warning(f"Error closing server handle: {e}")
+
+                # Close ZMQ resources immediately
+                if (
+                    hasattr(_websocket_proxy_instance, "socket")
+                    and _websocket_proxy_instance.socket
+                ):
+                    try:
+                        import zmq
+
+                        _websocket_proxy_instance.socket.setsockopt(zmq.LINGER, 0)
+                        _websocket_proxy_instance.socket.close()
+                    except Exception as e:
+                        logger.warning(f"Error closing ZMQ socket: {e}")
+
+                if (
+                    hasattr(_websocket_proxy_instance, "context")
+                    and _websocket_proxy_instance.context
+                ):
+                    try:
+                        _websocket_proxy_instance.context.term()
+                    except Exception as e:
+                        logger.warning(f"Error terminating ZMQ context: {e}")
+
+            except Exception as e:
+                logger.error(f"Error during WebSocket cleanup: {e}")
+            finally:
+                _websocket_proxy_instance = None
+
+        if _websocket_thread and _websocket_thread.is_alive():
+            logger.info("Waiting for WebSocket thread to finish...")
+            _websocket_thread.join(timeout=3.0)  # Reduced timeout for faster shutdown
+            if _websocket_thread.is_alive():
+                logger.warning("WebSocket thread did not finish gracefully")
+            _websocket_thread = None
+
+        logger.info("WebSocket server cleanup completed")
+
+    except Exception as e:
+        logger.error(f"Error during WebSocket cleanup: {e}")
+        # Last resort: force cleanup
+        _websocket_proxy_instance = None
+        _websocket_thread = None
+
+
+def signal_handler(signum, frame):
+    """Handle SIGINT (Ctrl+C) and SIGTERM signals"""
+    logger.info(f"Received signal {signum}, initiating graceful shutdown...")
+    cleanup_websocket_server()
+    # Use os._exit() for immediate termination across all platforms
+    os._exit(0)
+
+
+def start_websocket_server():
+    """
+    Start the WebSocket proxy server in a separate thread.
+    This function should be called when the FastAPI app starts.
+    """
+    global _websocket_proxy_instance, _websocket_thread
+
+    logger.debug("Starting WebSocket proxy server in a separate thread")
+
+    def run_websocket_server():
+        """Run the WebSocket server in an event loop"""
+        global _websocket_proxy_instance
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            # Import here to avoid circular imports
+            import os
+
+            from dotenv import load_dotenv
+
+            from .server import WebSocketProxy
+
+            load_dotenv()
+            ws_host = os.getenv("WEBSOCKET_HOST", "127.0.0.1")
+            ws_port = int(os.getenv("WEBSOCKET_PORT", "8765"))
+
+            # Create and store the proxy instance
+            _websocket_proxy_instance = WebSocketProxy(host=ws_host, port=ws_port)
+
+            # Start the proxy
+            loop.run_until_complete(_websocket_proxy_instance.start())
+
+        except Exception as e:
+            logger.exception(f"Error in WebSocket server thread: {e}")
+            _websocket_proxy_instance = None
+
+    # Start the WebSocket server in a daemon thread
+    _websocket_thread = threading.Thread(
+        target=run_websocket_server,
+        daemon=False,  # Changed to False so we can properly clean up
+    )
+    _websocket_thread.start()
+
+    # Register cleanup handlers
+    atexit.register(cleanup_websocket_server)
+
+    # Register signal handlers for graceful shutdown
+    try:
+        # SIGINT (Ctrl+C) - Available on all platforms
+        signal.signal(signal.SIGINT, signal_handler)
+        signals_registered = ["SIGINT"]
+
+        # SIGTERM - Available on Unix-like systems (Mac, Linux)
+        if hasattr(signal, "SIGTERM"):
+            signal.signal(signal.SIGTERM, signal_handler)
+            signals_registered.append("SIGTERM")
+
+        logger.debug(f"Signal handlers registered: {', '.join(signals_registered)}")
+    except Exception as e:
+        logger.warning(f"Could not register signal handlers: {e}")
+
+    logger.debug("WebSocket proxy server thread started")
+    return _websocket_thread
+
+
+async def start_websocket_proxy_async():
+    """
+    Async version of start_websocket_proxy for use in FastAPI lifespan.
+    
+    This should be called during FastAPI app startup.
+    """
+    global _websocket_server_started
+
+    # Check if this process should start the WebSocket server
+    if should_start_websocket():
+        # Our flag will prevent multiple starts if called multiple times
+        if not _websocket_server_started:
+            _websocket_server_started = True
+            logger.debug("Starting WebSocket server in FastAPI application process")
+            start_websocket_server()
+            logger.debug("WebSocket server integration with FastAPI complete")
+        else:
+            logger.debug("WebSocket server already running, skipping initialization")
+    else:
+        logger.debug("Skipping WebSocket server in reloader/monitor process")
+
+
+def start_websocket_proxy(app=None):
+    """
+    Integrate the WebSocket proxy server with a FastAPI application.
+    This should be called during app initialization.
+
+    Args:
+        app: FastAPI application instance (optional, for compatibility)
+    """
+    global _websocket_server_started
+
+    # Check if this process should start the WebSocket server
+    if should_start_websocket():
+        # Our flag will prevent multiple starts if called multiple times
+        if not _websocket_server_started:
+            _websocket_server_started = True
+            logger.debug("Starting WebSocket server in FastAPI application process")
+            start_websocket_server()
+            logger.debug("WebSocket server integration with FastAPI complete")
+        else:
+            logger.debug("WebSocket server already running, skipping initialization")
+    else:
+        logger.debug("Skipping WebSocket server in reloader/monitor process")
+
+
+async def cleanup_websocket_proxy_async():
+    """
+    Async version of cleanup for use in FastAPI lifespan shutdown.
+    """
+    cleanup_websocket_server()
+
+
+def get_websocket_proxy_status() -> dict:
+    """
+    Get the current status of the WebSocket proxy server.
+    
+    Returns:
+        dict: Status information including running state and connection details
+    """
+    global _websocket_proxy_instance, _websocket_server_started
+    
+    status = {
+        "started": _websocket_server_started,
+        "running": False,
+        "host": None,
+        "port": None,
+    }
+    
+    if _websocket_proxy_instance:
+        status["running"] = getattr(_websocket_proxy_instance, "running", False)
+        status["host"] = getattr(_websocket_proxy_instance, "host", None)
+        status["port"] = getattr(_websocket_proxy_instance, "port", None)
+    
+    return status

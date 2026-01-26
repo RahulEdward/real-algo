@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\dashboard.py
+# hypothesis_version: 6.149.1
+
+[302, 404, '/auth/login', '/auth/logout', '/broker', '/dashboard', '0.00', 'availablecash', 'broker', 'collateral', 'dashboard', 'data', 'user', 'utiliseddebits']

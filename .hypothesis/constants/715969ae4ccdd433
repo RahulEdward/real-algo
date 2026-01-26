@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\admin.py
+# hypothesis_version: 6.149.1
+
+[400, 404, 500, 1000, '%A', '%H:%M', '%Y-%m-%d', '.csv', '/admin', '/api/freeze', '/api/freeze/upload', '/api/freeze/{id}', '/api/holidays', '/api/holidays/{id}', '/api/stats', '/api/timings', '/api/timings/check', '10/minute', '50/second', 'API_RATE_LIMIT', 'Date is required', 'Entry not found', 'Holiday not found', 'NFO', 'TRADING_HOLIDAY', 'admin', 'closed_exchanges', 'count', 'current_year', 'data', 'date', 'day_name', 'description', 'end_time', 'error', 'exchange', 'exchanges', 'freeze_count', 'freeze_qty', 'holiday_count', 'holiday_type', 'id', 'message', 'start_time', 'status', 'success', 'symbol', 'timings', 'today', 'today_timings', 'wb', 'years']

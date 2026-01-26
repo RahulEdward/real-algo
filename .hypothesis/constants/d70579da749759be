@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\search.py
+# hypothesis_version: 6.149.1
+
+['/', '/api/expiries', '/api/search', '/api/underlyings', '/search', '/token', 'BFO', 'CDS', 'MCX', 'NFO', 'brexchange', 'brsymbol', 'error', 'exchange', 'expiries', 'expiry', 'flash_category', 'flash_message', 'freeze_qty', 'instrumenttype', 'lotsize', 'name', 'request', 'results', 'search', 'search.html', 'status', 'strike', 'success', 'symbol', 'templates', 'tick_size', 'token', 'token.html', 'underlyings']

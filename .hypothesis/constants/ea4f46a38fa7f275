@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\apikey.py
+# hypothesis_version: 6.149.1
+
+[400, 500, '/apikey', '/apikey/mode', 'Accept', 'User ID is required', 'api_key', 'apikey', 'apikey.html', 'application/json', 'auto', 'dist', 'error', 'frontend', 'has_api_key', 'index.html', 'key_id', 'login_username', 'message', 'mode', 'order_mode', 'request', 'semi_auto', 'templates', 'text/html', 'user', 'user_id']

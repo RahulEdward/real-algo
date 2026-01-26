@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\core.py
+# hypothesis_version: 6.149.1
+
+[302, '/', '/auth/login', '/download', '/faq', '/setup', 'PNG', 'black', 'core', 'download.html', 'email', 'error', 'faq.html', 'flash_category', 'flash_message', 'index.html', 'password', 'qr_code', 'request', 'setup.html', 'templates', 'totp_secret', 'totp_setup', 'username', 'white']

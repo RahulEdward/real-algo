@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\settings.py
+# hypothesis_version: 6.149.1
+
+[500, '/analyze-mode', '/analyze-mode/{mode}', '/settings', 'Analyze', 'Live', 'analyze_mode', 'error', 'message', 'settings', 'success']

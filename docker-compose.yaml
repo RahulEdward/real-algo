@@ -1,0 +1,40 @@
+services:
+  realalgo:
+    image: realalgo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: realalgo-web
+    ports:
+      - "${FLASK_PORT:-5000}:5000"
+      - "${WEBSOCKET_PORT:-8765}:8765"
+
+    # persistent DB, logs + mount the host .env read-only so dotenv can read it
+    volumes:
+      - realalgo_db:/app/db
+      - realalgo_logs:/app/logs          # Use named volume for logs
+      - realalgo_log:/app/log            # Application logs (named volume)
+      - realalgo_strategies:/app/strategies  # Python strategies (named volume - fixes permission issues)
+      - realalgo_keys:/app/keys          # API keys/certificates (named volume)
+      - ./.env:/app/.env:ro
+
+    # (optional) extra env-vars that are NOT in .env
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - FLASK_DEBUG=${FLASK_DEBUG:-0}
+
+    restart: unless-stopped
+
+# Define named volumes for database and logs persistence
+volumes:
+  realalgo_db:
+    driver: local
+  realalgo_logs:
+    driver: local
+  realalgo_log:
+    driver: local
+  realalgo_strategies:
+    driver: local
+  realalgo_keys:
+    driver: local

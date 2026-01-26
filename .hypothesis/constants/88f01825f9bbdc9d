@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\database\analyzer_db.py
+# hypothesis_version: 6.149.1
+
+[100, 'Analyzer DB', 'Asia/Kolkata', 'DATABASE_URL', 'analyzer_logs', 'api_type', 'check_same_thread', 'created_at', 'id', 'placeorder', 'request_data', 'response_data', 'sqlite']

@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\routers\broker_credentials.py
+# hypothesis_version: 6.149.1
+
+[400, 500, '"', "'", '*', ',', '..', '.env', '/([^/]+)/callback$', '/api/broker', '/credentials', '127.0.0.1', '5000', '5555', '8765', ':::', 'BROKER_API_KEY', 'BROKER_API_SECRET', 'FALSE', 'FLASK_HOST_IP', 'FLASK_PORT', 'HOST_SERVER', 'NGROK_ALLOW', 'REDIRECT_URL', 'TRUE', 'VALID_BROKERS', 'WEBSOCKET_HOST', 'WEBSOCKET_PORT', 'WEBSOCKET_URL', 'ZMQ_HOST', 'ZMQ_PORT', '\\', '\\"', '\\\\', '^https?://.+', '^wss?://.+', 'broker_api_key', 'broker_api_secret', 'broker_credentials', 'current_broker', 'data', 'dhan', 'error', 'fivepaisa', 'flask', 'flattrade', 'host', 'host_server', 'message', 'ngrok_allow', 'port', 'redirect_url', 'restart_required', 'server_status', 'status', 'success', 'updated_fields', 'utf-8', 'valid_brokers', 'w', 'websocket', 'websocket_url', 'zmq']

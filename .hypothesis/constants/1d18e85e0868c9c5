@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\limiter_fastapi.py
+# hypothesis_version: 6.149.1
+
+[' per ', ',', '/', '10 per second', '100 per minute', '15 per hour', '2 per second', '200 per minute', '25 per hour', '5 per minute', '50 per second', 'API_RATE_LIMIT', 'CF-Connecting-IP', 'LOGIN_RATE_LIMIT_MIN', 'ORDER_RATE_LIMIT', 'RESET_RATE_LIMIT', 'STRATEGY_RATE_LIMIT', 'True-Client-IP', 'WEBHOOK_RATE_LIMIT', 'X-Client-IP', 'X-Forwarded-For', 'X-Real-IP', 'memory://', 'moving-window', 'per ']

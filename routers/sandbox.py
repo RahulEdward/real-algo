@@ -1,0 +1,705 @@
+# routers/sandbox.py
+"""
+FastAPI Sandbox Router for RealAlgo
+Handles sandbox configuration, P&L tracking, square-off scheduling.
+Requirements: 4.7
+"""
+
+import os
+import traceback
+from datetime import datetime
+from decimal import Decimal
+
+import pytz
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+
+from database.sandbox_db import (
+    SandboxDailyPnL,
+    SandboxFunds,
+    SandboxHoldings,
+    SandboxOrders,
+    SandboxPositions,
+    SandboxTrades,
+    db_session,
+    get_all_configs,
+    get_config,
+    set_config,
+)
+from dependencies_fastapi import check_session_validity, get_session
+from limiter_fastapi import limiter
+from utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+API_RATE_LIMIT = os.getenv("API_RATE_LIMIT", "50/second")
+
+sandbox_router = APIRouter(prefix="/sandbox", tags=["sandbox"])
+templates = Jinja2Templates(directory="templates")
+
+
+@sandbox_router.get("/")
+@limiter.limit(API_RATE_LIMIT)
+async def sandbox_config(request: Request, session: dict = Depends(check_session_validity)):
+    """Render the sandbox configuration page"""
+    try:
+        configs = get_all_configs()
+
+        organized_configs = {
+            "capital": {
+                "title": "Capital Settings",
+                "configs": {
+                    "starting_capital": configs.get("starting_capital", {}),
+                    "reset_day": configs.get("reset_day", {}),
+                    "reset_time": configs.get("reset_time", {}),
+                },
+            },
+            "leverage": {
+                "title": "Leverage Settings",
+                "configs": {
+                    "equity_mis_leverage": configs.get("equity_mis_leverage", {}),
+                    "equity_cnc_leverage": configs.get("equity_cnc_leverage", {}),
+                    "futures_leverage": configs.get("futures_leverage", {}),
+                    "option_buy_leverage": configs.get("option_buy_leverage", {}),
+                    "option_sell_leverage": configs.get("option_sell_leverage", {}),
+                },
+            },
+            "square_off": {
+                "title": "Square-Off Times (IST)",
+                "configs": {
+                    "nse_bse_square_off_time": configs.get("nse_bse_square_off_time", {}),
+                    "cds_bcd_square_off_time": configs.get("cds_bcd_square_off_time", {}),
+                    "mcx_square_off_time": configs.get("mcx_square_off_time", {}),
+                    "ncdex_square_off_time": configs.get("ncdex_square_off_time", {}),
+                },
+            },
+            "intervals": {
+                "title": "Update Intervals (seconds)",
+                "configs": {
+                    "order_check_interval": configs.get("order_check_interval", {}),
+                    "mtm_update_interval": configs.get("mtm_update_interval", {}),
+                },
+            },
+        }
+
+        return templates.TemplateResponse(
+            "sandbox.html", {"request": request, "configs": organized_configs}
+        )
+    except Exception as e:
+        logger.error(f"Error rendering sandbox config: {str(e)}\n{traceback.format_exc()}")
+        return RedirectResponse(url="/", status_code=302)
+
+
+@sandbox_router.get("/api/configs")
+@limiter.limit(API_RATE_LIMIT)
+async def api_get_configs(request: Request, session: dict = Depends(check_session_validity)):
+    """API endpoint to get all sandbox configuration values as JSON"""
+    try:
+        configs = get_all_configs()
+
+        defaults = {
+            "starting_capital": {"value": "10000000.00", "description": "Starting sandbox capital in INR"},
+            "reset_day": {"value": "Never", "description": "Day of week for automatic fund reset"},
+            "reset_time": {"value": "00:00", "description": "Time for automatic fund reset (IST)"},
+            "equity_mis_leverage": {"value": "5", "description": "Leverage multiplier for equity MIS"},
+            "equity_cnc_leverage": {"value": "1", "description": "Leverage multiplier for equity CNC"},
+            "futures_leverage": {"value": "10", "description": "Leverage multiplier for futures"},
+            "option_buy_leverage": {"value": "1", "description": "Leverage for buying options"},
+            "option_sell_leverage": {"value": "1", "description": "Leverage for selling options"},
+            "nse_bse_square_off_time": {"value": "15:15", "description": "Square-off time for NSE/BSE MIS"},
+            "cds_bcd_square_off_time": {"value": "16:45", "description": "Square-off time for CDS/BCD MIS"},
+            "mcx_square_off_time": {"value": "23:30", "description": "Square-off time for MCX MIS"},
+            "ncdex_square_off_time": {"value": "17:00", "description": "Square-off time for NCDEX MIS"},
+            "order_check_interval": {"value": "5", "description": "Interval to check pending orders (1-30 sec)"},
+            "mtm_update_interval": {"value": "5", "description": "Interval to update MTM (0-60 sec)"},
+        }
+
+        def get_config_value(key):
+            return configs.get(key, defaults.get(key, {"value": "", "description": ""}))
+
+        organized_configs = {
+            "capital": {
+                "title": "Capital Settings",
+                "configs": {
+                    "starting_capital": get_config_value("starting_capital"),
+                    "reset_day": get_config_value("reset_day"),
+                    "reset_time": get_config_value("reset_time"),
+                },
+            },
+            "leverage": {
+                "title": "Leverage Settings",
+                "configs": {
+                    "equity_mis_leverage": get_config_value("equity_mis_leverage"),
+                    "equity_cnc_leverage": get_config_value("equity_cnc_leverage"),
+                    "futures_leverage": get_config_value("futures_leverage"),
+                    "option_buy_leverage": get_config_value("option_buy_leverage"),
+                    "option_sell_leverage": get_config_value("option_sell_leverage"),
+                },
+            },
+            "square_off": {
+                "title": "Square-Off Times (IST)",
+                "configs": {
+                    "nse_bse_square_off_time": get_config_value("nse_bse_square_off_time"),
+                    "cds_bcd_square_off_time": get_config_value("cds_bcd_square_off_time"),
+                    "mcx_square_off_time": get_config_value("mcx_square_off_time"),
+                    "ncdex_square_off_time": get_config_value("ncdex_square_off_time"),
+                },
+            },
+            "intervals": {
+                "title": "Update Intervals (seconds)",
+                "configs": {
+                    "order_check_interval": get_config_value("order_check_interval"),
+                    "mtm_update_interval": get_config_value("mtm_update_interval"),
+                },
+            },
+        }
+
+        return JSONResponse({"status": "success", "configs": organized_configs})
+    except Exception as e:
+        logger.error(f"Error getting sandbox configs: {str(e)}\n{traceback.format_exc()}")
+        return JSONResponse(
+            {"status": "error", "message": f"Error loading configuration: {str(e)}"},
+            status_code=500,
+        )
+
+
+@sandbox_router.post("/update")
+@limiter.limit(API_RATE_LIMIT)
+async def update_config(request: Request, session: dict = Depends(check_session_validity)):
+    """Update sandbox configuration values"""
+    try:
+        data = await request.json()
+        config_key = data.get("config_key")
+        config_value = data.get("config_value")
+
+        if not config_key or config_value is None:
+            return JSONResponse(
+                {"status": "error", "message": "Missing config_key or config_value"},
+                status_code=400,
+            )
+
+        validation_error = validate_config(config_key, config_value)
+        if validation_error:
+            return JSONResponse({"status": "error", "message": validation_error}, status_code=400)
+
+        success = set_config(config_key, config_value)
+
+        if success:
+            logger.info(f"Sandbox config updated: {config_key} = {config_value}")
+
+            if config_key == "starting_capital":
+                try:
+                    new_capital = Decimal(str(config_value))
+                    funds = SandboxFunds.query.all()
+                    for fund in funds:
+                        fund.total_capital = new_capital
+                        fund.available_balance = new_capital - fund.used_margin + fund.total_pnl
+                    db_session.commit()
+                    logger.info(f"Updated {len(funds)} user funds with new starting capital: ₹{new_capital}")
+                except Exception as e:
+                    logger.error(f"Error updating user funds with new capital: {e}")
+                    db_session.rollback()
+
+            if config_key.endswith("square_off_time"):
+                try:
+                    from services.sandbox_service import sandbox_reload_squareoff_schedule
+                    reload_success, reload_response, reload_status = sandbox_reload_squareoff_schedule()
+                    if reload_success:
+                        logger.info(f"Square-off schedule reloaded after {config_key} update")
+                    else:
+                        logger.warning(f"Failed to reload square-off schedule: {reload_response.get('message')}")
+                except Exception as e:
+                    logger.error(f"Error auto-reloading square-off schedule: {e}")
+
+            if config_key in ["reset_day", "reset_time"]:
+                try:
+                    from services.sandbox_service import sandbox_reload_squareoff_schedule
+                    reload_success, reload_response, reload_status = sandbox_reload_squareoff_schedule()
+                    if reload_success:
+                        logger.info(f"Schedule reloaded after {config_key} update")
+                    else:
+                        logger.warning(f"Failed to reload schedule: {reload_response.get('message')}")
+                except Exception as e:
+                    logger.error(f"Error auto-reloading schedule: {e}")
+
+            return JSONResponse(
+                {"status": "success", "message": f"Configuration {config_key} updated successfully"}
+            )
+        else:
+            return JSONResponse(
+                {"status": "error", "message": "Failed to update configuration"}, status_code=500
+            )
+
+    except Exception as e:
+        logger.error(f"Error updating sandbox config: {str(e)}\n{traceback.format_exc()}")
+        return JSONResponse(
+            {"status": "error", "message": f"Error updating configuration: {str(e)}"},
+            status_code=500,
+        )
+
+
+@sandbox_router.post("/reset")
+@limiter.limit(API_RATE_LIMIT)
+async def reset_config(request: Request, session: dict = Depends(check_session_validity)):
+    """Reset sandbox configuration to defaults and clear all sandbox data"""
+    try:
+        user_id = session.get("user")
+
+        default_configs = {
+            "starting_capital": "10000000.00",
+            "reset_day": "Never",
+            "reset_time": "00:00",
+            "order_check_interval": "5",
+            "mtm_update_interval": "5",
+            "nse_bse_square_off_time": "15:15",
+            "cds_bcd_square_off_time": "16:45",
+            "mcx_square_off_time": "23:30",
+            "ncdex_square_off_time": "17:00",
+            "equity_mis_leverage": "5",
+            "equity_cnc_leverage": "1",
+            "futures_leverage": "10",
+            "option_buy_leverage": "1",
+            "option_sell_leverage": "1",
+        }
+
+        for key, value in default_configs.items():
+            set_config(key, value)
+
+        try:
+            deleted_orders = SandboxOrders.query.filter_by(user_id=user_id).delete()
+            logger.info(f"Deleted {deleted_orders} sandbox orders for user {user_id}")
+
+            deleted_trades = SandboxTrades.query.filter_by(user_id=user_id).delete()
+            logger.info(f"Deleted {deleted_trades} sandbox trades for user {user_id}")
+
+            deleted_positions = SandboxPositions.query.filter_by(user_id=user_id).delete()
+            logger.info(f"Deleted {deleted_positions} sandbox positions for user {user_id}")
+
+            deleted_holdings = SandboxHoldings.query.filter_by(user_id=user_id).delete()
+            logger.info(f"Deleted {deleted_holdings} sandbox holdings for user {user_id}")
+
+            deleted_daily_pnl = SandboxDailyPnL.query.filter_by(user_id=user_id).delete()
+            logger.info(f"Deleted {deleted_daily_pnl} daily P&L records for user {user_id}")
+
+            fund = SandboxFunds.query.filter_by(user_id=user_id).first()
+            starting_capital = Decimal(default_configs["starting_capital"])
+
+            if fund:
+                fund.total_capital = starting_capital
+                fund.available_balance = starting_capital
+                fund.used_margin = Decimal("0.00")
+                fund.unrealized_pnl = Decimal("0.00")
+                fund.realized_pnl = Decimal("0.00")
+                fund.today_realized_pnl = Decimal("0.00")
+                fund.total_pnl = Decimal("0.00")
+                fund.last_reset_date = datetime.now(pytz.timezone("Asia/Kolkata"))
+                fund.reset_count = (fund.reset_count or 0) + 1
+                logger.info(f"Reset sandbox funds for user {user_id}")
+            else:
+                fund = SandboxFunds(
+                    user_id=user_id,
+                    total_capital=starting_capital,
+                    available_balance=starting_capital,
+                    used_margin=Decimal("0.00"),
+                    unrealized_pnl=Decimal("0.00"),
+                    realized_pnl=Decimal("0.00"),
+                    today_realized_pnl=Decimal("0.00"),
+                    total_pnl=Decimal("0.00"),
+                    last_reset_date=datetime.now(pytz.timezone("Asia/Kolkata")),
+                    reset_count=1,
+                )
+                db_session.add(fund)
+                logger.info(f"Created new sandbox funds for user {user_id}")
+
+            db_session.commit()
+            logger.info(f"Successfully reset all sandbox data for user {user_id}")
+
+        except Exception as e:
+            db_session.rollback()
+            logger.error(f"Error clearing sandbox data: {str(e)}\n{traceback.format_exc()}")
+            raise
+
+        logger.info("Sandbox configuration and data reset to defaults")
+        return JSONResponse({
+            "status": "success",
+            "message": "Configuration and data reset to defaults successfully. All orders, trades, positions, holdings, and P&L history have been cleared.",
+        })
+
+    except Exception as e:
+        logger.error(f"Error resetting sandbox config: {str(e)}\n{traceback.format_exc()}")
+        return JSONResponse(
+            {"status": "error", "message": f"Error resetting configuration: {str(e)}"},
+            status_code=500,
+        )
+
+
+@sandbox_router.post("/reload-squareoff")
+@limiter.limit(API_RATE_LIMIT)
+async def reload_squareoff(request: Request, session: dict = Depends(check_session_validity)):
+    """Manually reload square-off schedule from config"""
+    try:
+        from services.sandbox_service import sandbox_reload_squareoff_schedule
+
+        success, response, status_code = sandbox_reload_squareoff_schedule()
+        return JSONResponse(response, status_code=status_code)
+
+    except Exception as e:
+        logger.error(f"Error reloading square-off schedule: {str(e)}\n{traceback.format_exc()}")
+        return JSONResponse(
+            {"status": "error", "message": f"Error reloading square-off schedule: {str(e)}"},
+            status_code=500,
+        )
+
+
+@sandbox_router.get("/squareoff-status")
+@limiter.limit(API_RATE_LIMIT)
+async def squareoff_status(request: Request, session: dict = Depends(check_session_validity)):
+    """Get current square-off scheduler status"""
+    try:
+        from services.sandbox_service import sandbox_get_squareoff_status
+
+        success, response, status_code = sandbox_get_squareoff_status()
+        return JSONResponse(response, status_code=status_code)
+
+    except Exception as e:
+        logger.error(f"Error getting square-off status: {str(e)}\n{traceback.format_exc()}")
+        return JSONResponse(
+            {"status": "error", "message": f"Error getting square-off status: {str(e)}"},
+            status_code=500,
+        )
+
+
+@sandbox_router.get("/mypnl/api/data")
+@limiter.limit(API_RATE_LIMIT)
+async def api_my_pnl_data(request: Request, session: dict = Depends(check_session_validity)):
+    """API endpoint to get P&L data as JSON for React frontend"""
+    try:
+        user_id = session.get("user")
+
+        positions = (
+            SandboxPositions.query.filter_by(user_id=user_id)
+            .order_by(SandboxPositions.updated_at.desc())
+            .all()
+        )
+
+        holdings = (
+            SandboxHoldings.query.filter_by(user_id=user_id)
+            .order_by(SandboxHoldings.updated_at.desc())
+            .all()
+        )
+
+        funds = SandboxFunds.query.filter_by(user_id=user_id).first()
+
+        position_list = []
+        positions_unrealized = Decimal("0.00")
+
+        for pos in positions:
+            today_realized = Decimal(str(pos.today_realized_pnl or 0))
+            all_time_realized = Decimal(str(pos.accumulated_realized_pnl or 0))
+            unrealized = Decimal(str(pos.pnl or 0)) if pos.quantity != 0 else Decimal("0.00")
+
+            if pos.quantity != 0:
+                positions_unrealized += unrealized
+
+            position_list.append({
+                "symbol": pos.symbol,
+                "exchange": pos.exchange,
+                "product": pos.product,
+                "quantity": pos.quantity,
+                "average_price": float(pos.average_price),
+                "ltp": float(pos.ltp) if pos.ltp else 0.0,
+                "unrealized_pnl": float(unrealized),
+                "today_realized_pnl": float(today_realized),
+                "all_time_realized_pnl": float(all_time_realized),
+                "status": "Open" if pos.quantity != 0 else "Closed",
+                "updated_at": pos.updated_at.strftime("%Y-%m-%d %H:%M:%S") if pos.updated_at else "",
+            })
+
+        holdings_list = []
+        holdings_unrealized = Decimal("0.00")
+
+        for holding in holdings:
+            if holding.quantity != 0:
+                unrealized = Decimal(str(holding.pnl or 0))
+                holdings_unrealized += unrealized
+
+                holdings_list.append({
+                    "symbol": holding.symbol,
+                    "exchange": holding.exchange,
+                    "product": "CNC",
+                    "quantity": holding.quantity,
+                    "average_price": float(holding.average_price),
+                    "ltp": float(holding.ltp) if holding.ltp else 0.0,
+                    "unrealized_pnl": float(unrealized),
+                    "pnl_percent": float(holding.pnl_percent or 0),
+                    "settlement_date": holding.settlement_date.strftime("%Y-%m-%d") if holding.settlement_date else "",
+                })
+
+        trades = (
+            SandboxTrades.query.filter_by(user_id=user_id)
+            .order_by(SandboxTrades.trade_timestamp.desc())
+            .limit(50)
+            .all()
+        )
+
+        trade_list = []
+        for trade in trades:
+            trade_list.append({
+                "tradeid": trade.tradeid,
+                "symbol": trade.symbol,
+                "exchange": trade.exchange,
+                "action": trade.action,
+                "quantity": trade.quantity,
+                "price": float(trade.price),
+                "product": trade.product,
+                "timestamp": trade.trade_timestamp.strftime("%Y-%m-%d %H:%M:%S") if trade.trade_timestamp else "",
+            })
+
+        daily_pnl_records = (
+            SandboxDailyPnL.query.filter_by(user_id=user_id)
+            .order_by(SandboxDailyPnL.date.desc())
+            .limit(30)
+            .all()
+        )
+
+        daily_pnl_list = []
+        for record in daily_pnl_records:
+            daily_pnl_list.append({
+                "date": record.date.strftime("%Y-%m-%d"),
+                "realized_pnl": float(record.realized_pnl or 0),
+                "positions_unrealized": float(record.positions_unrealized_pnl or 0),
+                "holdings_unrealized": float(record.holdings_unrealized_pnl or 0),
+                "total_unrealized": float((record.positions_unrealized_pnl or 0) + (record.holdings_unrealized_pnl or 0)),
+                "total_mtm": float(record.total_mtm or 0),
+                "portfolio_value": float(record.portfolio_value or 0),
+            })
+
+        today_realized = Decimal(str(funds.today_realized_pnl or 0)) if funds else Decimal("0.00")
+        total_unrealized = positions_unrealized + holdings_unrealized
+        today_total_mtm = today_realized + total_unrealized
+
+        summary = {
+            "today_realized_pnl": float(today_realized),
+            "all_time_realized_pnl": float(funds.realized_pnl or 0) if funds else 0.0,
+            "positions_unrealized_pnl": float(positions_unrealized),
+            "holdings_unrealized_pnl": float(holdings_unrealized),
+            "total_unrealized_pnl": float(total_unrealized),
+            "today_total_mtm": float(today_total_mtm),
+            "total_pnl": float(funds.total_pnl or 0) if funds else 0.0,
+            "available_balance": float(funds.available_balance or 0) if funds else 0.0,
+            "total_capital": float(funds.total_capital or 0) if funds else 0.0,
+        }
+
+        return JSONResponse({
+            "status": "success",
+            "data": {
+                "summary": summary,
+                "daily_pnl": daily_pnl_list,
+                "positions": position_list,
+                "holdings": holdings_list,
+                "trades": trade_list,
+            },
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting P&L data: {str(e)}\n{traceback.format_exc()}")
+        return JSONResponse(
+            {"status": "error", "message": f"Error loading P&L data: {str(e)}"}, status_code=500
+        )
+
+
+@sandbox_router.get("/mypnl")
+@limiter.limit(API_RATE_LIMIT)
+async def my_pnl(request: Request, session: dict = Depends(check_session_validity)):
+    """Render the historical P&L page"""
+    try:
+        user_id = session.get("user")
+        ist = pytz.timezone("Asia/Kolkata")
+
+        positions = (
+            SandboxPositions.query.filter_by(user_id=user_id)
+            .order_by(SandboxPositions.updated_at.desc())
+            .all()
+        )
+
+        holdings = (
+            SandboxHoldings.query.filter_by(user_id=user_id)
+            .order_by(SandboxHoldings.updated_at.desc())
+            .all()
+        )
+
+        funds = SandboxFunds.query.filter_by(user_id=user_id).first()
+
+        position_list = []
+        positions_unrealized = Decimal("0.00")
+
+        for pos in positions:
+            today_realized = Decimal(str(pos.today_realized_pnl or 0))
+            all_time_realized = Decimal(str(pos.accumulated_realized_pnl or 0))
+            unrealized = Decimal(str(pos.pnl or 0)) if pos.quantity != 0 else Decimal("0.00")
+
+            if pos.quantity != 0:
+                positions_unrealized += unrealized
+
+            position_list.append({
+                "symbol": pos.symbol,
+                "exchange": pos.exchange,
+                "product": pos.product,
+                "quantity": pos.quantity,
+                "average_price": float(pos.average_price),
+                "ltp": float(pos.ltp) if pos.ltp else 0.0,
+                "unrealized_pnl": float(unrealized),
+                "today_realized_pnl": float(today_realized),
+                "all_time_realized_pnl": float(all_time_realized),
+                "status": "Open" if pos.quantity != 0 else "Closed",
+                "updated_at": pos.updated_at.strftime("%Y-%m-%d %H:%M:%S") if pos.updated_at else "",
+            })
+
+        holdings_list = []
+        holdings_unrealized = Decimal("0.00")
+
+        for holding in holdings:
+            if holding.quantity != 0:
+                unrealized = Decimal(str(holding.pnl or 0))
+                holdings_unrealized += unrealized
+
+                holdings_list.append({
+                    "symbol": holding.symbol,
+                    "exchange": holding.exchange,
+                    "product": "CNC",
+                    "quantity": holding.quantity,
+                    "average_price": float(holding.average_price),
+                    "ltp": float(holding.ltp) if holding.ltp else 0.0,
+                    "unrealized_pnl": float(unrealized),
+                    "pnl_percent": float(holding.pnl_percent or 0),
+                    "settlement_date": holding.settlement_date.strftime("%Y-%m-%d") if holding.settlement_date else "",
+                })
+
+        trades = (
+            SandboxTrades.query.filter_by(user_id=user_id)
+            .order_by(SandboxTrades.trade_timestamp.desc())
+            .limit(50)
+            .all()
+        )
+
+        trade_list = []
+        for trade in trades:
+            trade_list.append({
+                "tradeid": trade.tradeid,
+                "symbol": trade.symbol,
+                "exchange": trade.exchange,
+                "action": trade.action,
+                "quantity": trade.quantity,
+                "price": float(trade.price),
+                "product": trade.product,
+                "timestamp": trade.trade_timestamp.strftime("%Y-%m-%d %H:%M:%S") if trade.trade_timestamp else "",
+            })
+
+        daily_pnl_records = (
+            SandboxDailyPnL.query.filter_by(user_id=user_id)
+            .order_by(SandboxDailyPnL.date.desc())
+            .limit(30)
+            .all()
+        )
+
+        daily_pnl_list = []
+        for record in daily_pnl_records:
+            daily_pnl_list.append({
+                "date": record.date.strftime("%Y-%m-%d"),
+                "realized_pnl": float(record.realized_pnl or 0),
+                "positions_unrealized": float(record.positions_unrealized_pnl or 0),
+                "holdings_unrealized": float(record.holdings_unrealized_pnl or 0),
+                "total_unrealized": float((record.positions_unrealized_pnl or 0) + (record.holdings_unrealized_pnl or 0)),
+                "total_mtm": float(record.total_mtm or 0),
+                "portfolio_value": float(record.portfolio_value or 0),
+            })
+
+        today_realized = Decimal(str(funds.today_realized_pnl or 0)) if funds else Decimal("0.00")
+        total_unrealized = positions_unrealized + holdings_unrealized
+        today_total_mtm = today_realized + total_unrealized
+
+        summary = {
+            "today_realized_pnl": float(today_realized),
+            "all_time_realized_pnl": float(funds.realized_pnl or 0) if funds else 0.0,
+            "positions_unrealized_pnl": float(positions_unrealized),
+            "holdings_unrealized_pnl": float(holdings_unrealized),
+            "total_unrealized_pnl": float(total_unrealized),
+            "today_total_mtm": float(today_total_mtm),
+            "total_pnl": float(funds.total_pnl or 0) if funds else 0.0,
+            "available_balance": float(funds.available_balance or 0) if funds else 0.0,
+            "total_capital": float(funds.total_capital or 0) if funds else 0.0,
+        }
+
+        return templates.TemplateResponse(
+            "sandbox_mypnl.html",
+            {
+                "request": request,
+                "positions": position_list,
+                "holdings": holdings_list,
+                "trades": trade_list,
+                "daily_pnl": daily_pnl_list,
+                "summary": summary,
+            },
+        )
+
+    except Exception as e:
+        logger.error(f"Error rendering my P&L page: {str(e)}\n{traceback.format_exc()}")
+        return RedirectResponse(url="/sandbox", status_code=302)
+
+
+def validate_config(config_key, config_value):
+    """Validate configuration values"""
+    try:
+        if config_key in [
+            "starting_capital", "equity_mis_leverage", "equity_cnc_leverage",
+            "futures_leverage", "option_buy_leverage", "option_sell_leverage",
+            "order_check_interval", "mtm_update_interval",
+        ]:
+            try:
+                value = float(config_value)
+                if value < 0:
+                    return f"{config_key} must be a positive number"
+
+                if config_key == "starting_capital":
+                    valid_capitals = [100000, 500000, 1000000, 2500000, 5000000, 10000000]
+                    if value not in valid_capitals:
+                        return "Starting capital must be one of: ₹1L, ₹5L, ₹10L, ₹25L, ₹50L, or ₹1Cr"
+
+                if config_key.endswith("_leverage"):
+                    if value < 1:
+                        return "Leverage must be at least 1x"
+                    if value > 50:
+                        return "Leverage cannot exceed 50x"
+
+                if config_key == "order_check_interval":
+                    if value < 1 or value > 30:
+                        return "Order check interval must be between 1-30 seconds"
+
+                if config_key == "mtm_update_interval":
+                    if value < 0 or value > 60:
+                        return "MTM update interval must be between 0-60 seconds (0 = manual only)"
+
+            except ValueError:
+                return f"{config_key} must be a valid number"
+
+        if config_key.endswith("_time"):
+            if ":" not in config_value:
+                return "Time must be in HH:MM format"
+            try:
+                hours, minutes = config_value.split(":")
+                if not (0 <= int(hours) <= 23 and 0 <= int(minutes) <= 59):
+                    return "Invalid time format"
+            except:
+                return "Time must be in HH:MM format"
+
+        if config_key == "reset_day":
+            valid_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Never"]
+            if config_value not in valid_days:
+                return f"Reset day must be one of: {', '.join(valid_days)}"
+
+        return None
+
+    except Exception as e:
+        logger.error(f"Error validating config: {str(e)}")
+        return f"Validation error: {str(e)}"

@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\database\chartink_db.py
+# hypothesis_version: 6.149.1
+
+[100, 255, 'Chartink DB', 'ChartinkStrategy', 'DATABASE_URL', 'all, delete-orphan', 'chartink_strategies', 'chartink_symbol', 'check_same_thread', 'exchange', 'product_type', 'quantity', 'sqlite', 'strategy', 'symbol_mappings']

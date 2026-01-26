@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\database\apilog_db.py
+# hypothesis_version: 6.149.1
+
+[100, 'API Log DB', 'Asia/Kolkata', 'DATABASE_URL', 'check_same_thread', 'order_logs', 'sqlite']

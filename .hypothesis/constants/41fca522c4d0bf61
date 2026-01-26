@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\utils\auth_utils.py
+# hypothesis_version: 6.149.1
+
+[200, 401, 500, '*', '/dashboard', 'AUTH_TOKEN', 'Accept', 'Content-Type', 'FEED_TOKEN', 'POST', 'Password is required', 'USER_ID', 'X-Requested-With', 'XMLHttpRequest', '[!@#$%^&*]', '[0-9]', '[A-Z]', '[a-z]', 'application/json', 'auth.broker_login', 'broker', 'broker.html', 'downloading', 'error', 'logged_in', 'message', 'multipart/form-data', 'redirect', 'status', 'success', 'user_session_key']

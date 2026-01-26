@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\dependencies_fastapi.py
+# hypothesis_version: 6.149.1
+
+[307, 401, '/auth/login', '03:00', ':', 'API key is required', 'Accept', 'Asia/Kolkata', 'Content-Type', 'Invalid API key', 'Location', 'SESSION_EXPIRY_TIME', 'UTC', 'X-Requested-With', 'XMLHttpRequest', 'apikey', 'application/json', 'error', 'logged_in', 'login_time', 'message', 'session_expired', 'status', 'user']

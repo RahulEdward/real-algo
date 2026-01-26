@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\extensions_fastapi.py
+# hypothesis_version: 6.149.1
+
+[1000, '*', '/', '/market', 'API key is required', 'Invalid API key', 'LTP', 'Not authenticated', 'QUERY_STRING', 'Quote', 'api_key', 'apikey', 'asgi', 'auth_error', 'auth_success', 'authenticate', 'authenticated', 'broker', 'connect', 'connected', 'data', 'depth', 'depth_data', 'depth_update', 'disconnect', 'error', 'exchange', 'get_depth', 'get_ltp', 'get_quote', 'ltp', 'ltp_data', 'ltp_update', 'market_data', 'message', 'mode', 'namespace', 'ok', 'order_update', 'pong_server', 'position_update', 'quote', 'quote_data', 'quote_update', 'sid', 'status', 'subscribe', 'subscribed', 'subscription_error', 'subscription_success', 'subscriptions', 'success', 'symbol', 'symbols', 'timestamp', 'type', 'unsubscribe', 'unsubscribed', 'unsubscription_error', 'username']

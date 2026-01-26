@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\broker\angel\streaming\angel_mapping.py
+# hypothesis_version: 6.149.1
+
+['BFO', 'BSE', 'BSE_INDEX', 'CDS', 'MCX', 'NCX', 'NFO', 'NSE', 'NSE_INDEX']

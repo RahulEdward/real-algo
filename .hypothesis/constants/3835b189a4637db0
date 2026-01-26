@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\broker\indmoney\streaming\indmoney_mapping.py
+# hypothesis_version: 6.149.1
+
+['BFO', 'BIDX', 'BSE', 'BSE_INDEX', 'CDS', 'MCX', 'NCX', 'NFO', 'NIDX', 'NSE', 'NSE_INDEX', 'ltp', 'quote']

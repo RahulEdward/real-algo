@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\services\funds_service.py
+# hypothesis_version: 6.149.1
+
+[200, 400, 403, 404, 500, 'analyze', 'apikey', 'data', 'error', 'message', 'mode', 'status', 'success']

@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\broker\definedge\streaming\definedge_mapping.py
+# hypothesis_version: 6.149.1
+
+['BFO', 'BSE', 'BSE_INDEX', 'CDS', 'MCX', 'NFO', 'NSE', 'NSE_INDEX', 'd', 't']

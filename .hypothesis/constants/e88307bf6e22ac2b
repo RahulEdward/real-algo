@@ -1,0 +1,4 @@
+# file: D:\realalgo-main\services\market_data_service.py
+# hypothesis_version: 6.149.1
+
+[20.0, 1000000000000.0, 100, 300, 1000, 3600, 'AUTHENTICATED', 'CONNECTED', 'Market data is stale', 'Missing LTP value', 'all', 'buy', 'cache_hits', 'cache_misses', 'callback', 'change', 'change_percent', 'close', 'connection_status', 'created_at', 'critical_subscribers', 'data', 'data_flow_active', 'depth', 'event_type', 'exchange', 'filter', 'healthy', 'high', 'hit_rate', 'last_cleanup', 'last_update', 'low', 'ltp', 'mode', 'name', 'open', 'quote', 'reconnect_count', 'sell', 'stale_data_events', 'start_time', 'symbol', 'timestamp', 'total_subscribers', 'total_symbols', 'total_updates', 'trade_management', 'unhealthy', 'unknown', 'uptime_seconds', 'validation_errors', 'value', 'volume']
