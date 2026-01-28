@@ -12,8 +12,7 @@ from importlib import import_module
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 
 from database.auth_db import get_api_key_for_tradingview, get_auth_token
 from database.settings_db import get_analyze_mode
@@ -28,7 +27,6 @@ from utils.logging import get_logger
 
 logger = get_logger(__name__)
 orders_router = APIRouter(prefix="", tags=["orders"])
-templates = Jinja2Templates(directory="templates")
 
 
 def dynamic_import(broker: str, module_name: str, function_names: list) -> Optional[Dict]:
@@ -85,162 +83,8 @@ def generate_positions_csv(positions_data: list) -> str:
 
 
 
-@orders_router.get("/orderbook")
-@limiter.limit(API_RATE_LIMIT)
-async def orderbook(request: Request, session: dict = Depends(check_session_validity)):
-    """Display orderbook page."""
-    login_username = session["user"]
-    auth_token = get_auth_token(login_username)
-
-    if auth_token is None:
-        logger.warning(f"No auth token found for user {login_username}")
-        return RedirectResponse(url="/auth/logout", status_code=302)
-
-    broker = session.get("broker")
-    if not broker:
-        logger.error("Broker not set in session")
-        return Response(content="Broker not set in session", status_code=400)
-
-    if get_analyze_mode():
-        api_key = get_api_key_for_tradingview(login_username)
-        if api_key:
-            success, response, status_code = get_orderbook(api_key=api_key)
-        else:
-            logger.error("No API key found for analyze mode")
-            return Response(content="API key required for analyze mode", status_code=400)
-    else:
-        success, response, status_code = get_orderbook(auth_token=auth_token, broker=broker)
-
-    if not success:
-        logger.error(f"Failed to get orderbook data: {response.get('message', 'Unknown error')}")
-        if status_code == 404:
-            return Response(content="Failed to import broker module", status_code=500)
-        return RedirectResponse(url="/auth/logout", status_code=302)
-
-    data = response.get("data", {})
-    order_data = data.get("orders", [])
-    order_stats = data.get("statistics", {})
-
-    return templates.TemplateResponse("orderbook.html", {
-        "request": request, "order_data": order_data, "order_stats": order_stats
-    })
-
-
-@orders_router.get("/tradebook")
-@limiter.limit(API_RATE_LIMIT)
-async def tradebook(request: Request, session: dict = Depends(check_session_validity)):
-    """Display tradebook page."""
-    login_username = session["user"]
-    auth_token = get_auth_token(login_username)
-
-    if auth_token is None:
-        logger.warning(f"No auth token found for user {login_username}")
-        return RedirectResponse(url="/auth/logout", status_code=302)
-
-    broker = session.get("broker")
-    if not broker:
-        logger.error("Broker not set in session")
-        return Response(content="Broker not set in session", status_code=400)
-
-    if get_analyze_mode():
-        api_key = get_api_key_for_tradingview(login_username)
-        if api_key:
-            success, response, status_code = get_tradebook(api_key=api_key)
-        else:
-            logger.error("No API key found for analyze mode")
-            return Response(content="API key required for analyze mode", status_code=400)
-    else:
-        success, response, status_code = get_tradebook(auth_token=auth_token, broker=broker)
-
-    if not success:
-        logger.error(f"Failed to get tradebook data: {response.get('message', 'Unknown error')}")
-        if status_code == 404:
-            return Response(content="Failed to import broker module", status_code=500)
-        return RedirectResponse(url="/auth/logout", status_code=302)
-
-    tradebook_data = response.get("data", [])
-    return templates.TemplateResponse("tradebook.html", {
-        "request": request, "tradebook_data": tradebook_data
-    })
-
-
-@orders_router.get("/positions")
-@limiter.limit(API_RATE_LIMIT)
-async def positions(request: Request, session: dict = Depends(check_session_validity)):
-    """Display positions page."""
-    login_username = session["user"]
-    auth_token = get_auth_token(login_username)
-
-    if auth_token is None:
-        logger.warning(f"No auth token found for user {login_username}")
-        return RedirectResponse(url="/auth/logout", status_code=302)
-
-    broker = session.get("broker")
-    if not broker:
-        logger.error("Broker not set in session")
-        return Response(content="Broker not set in session", status_code=400)
-
-    if get_analyze_mode():
-        api_key = get_api_key_for_tradingview(login_username)
-        if api_key:
-            success, response, status_code = get_positionbook(api_key=api_key)
-        else:
-            logger.error("No API key found for analyze mode")
-            return Response(content="API key required for analyze mode", status_code=400)
-    else:
-        success, response, status_code = get_positionbook(auth_token=auth_token, broker=broker)
-
-    if not success:
-        logger.error(f"Failed to get positions data: {response.get('message', 'Unknown error')}")
-        if status_code == 404:
-            return Response(content="Failed to import broker module", status_code=500)
-        return RedirectResponse(url="/auth/logout", status_code=302)
-
-    positions_data = response.get("data", [])
-    return templates.TemplateResponse("positions.html", {
-        "request": request, "positions_data": positions_data
-    })
-
-
-@orders_router.get("/holdings")
-@limiter.limit(API_RATE_LIMIT)
-async def holdings(request: Request, session: dict = Depends(check_session_validity)):
-    """Display holdings page."""
-    login_username = session["user"]
-    auth_token = get_auth_token(login_username)
-
-    if auth_token is None:
-        logger.warning(f"No auth token found for user {login_username}")
-        return RedirectResponse(url="/auth/logout", status_code=302)
-
-    broker = session.get("broker")
-    if not broker:
-        logger.error("Broker not set in session")
-        return Response(content="Broker not set in session", status_code=400)
-
-    if get_analyze_mode():
-        api_key = get_api_key_for_tradingview(login_username)
-        if api_key:
-            success, response, status_code = get_holdings(api_key=api_key)
-        else:
-            logger.error("No API key found for analyze mode")
-            return Response(content="API key required for analyze mode", status_code=400)
-    else:
-        success, response, status_code = get_holdings(auth_token=auth_token, broker=broker)
-
-    if not success:
-        logger.error(f"Failed to get holdings data: {response.get('message', 'Unknown error')}")
-        if status_code == 404:
-            return Response(content="Failed to import broker module", status_code=500)
-        return RedirectResponse(url="/auth/logout", status_code=302)
-
-    data = response.get("data", {})
-    holdings_data = data.get("holdings", [])
-    portfolio_stats = data.get("statistics", {})
-
-    return templates.TemplateResponse("holdings.html", {
-        "request": request, "holdings_data": holdings_data, "portfolio_stats": portfolio_stats
-    })
+# Note: /orderbook, /tradebook, /positions, /holdings GET routes are handled by react_app.py
+# The REST API endpoints are in routers/api_v1/ (POST /api/v1/orderbook, etc.)
 
 
 @orders_router.get("/orderbook/export")
@@ -660,42 +504,6 @@ async def modify_order_ui(request: Request, session: dict = Depends(check_sessio
 
 
 # Action Center Routes
-
-@orders_router.get("/action-center")
-@limiter.limit(API_RATE_LIMIT)
-async def action_center(request: Request, status: str = Query("pending"), session: dict = Depends(check_session_validity)):
-    """Action Center - Manage pending semi-automated orders."""
-    login_username = session["user"]
-    status_filter = status
-
-    from services.action_center_service import get_action_center_data
-
-    if status_filter == "all":
-        success, response, status_code = get_action_center_data(login_username, status_filter=None)
-    else:
-        success, response, status_code = get_action_center_data(login_username, status_filter=status_filter)
-
-    if not success:
-        logger.error(f"Failed to get action center data: {response.get('message', 'Unknown error')}")
-        return templates.TemplateResponse("action_center.html", {
-            "request": request,
-            "order_data": [],
-            "order_stats": {},
-            "current_filter": status_filter,
-            "login_username": login_username,
-        })
-
-    data = response.get("data", {})
-    order_data = data.get("orders", [])
-    order_stats = data.get("statistics", {})
-
-    return templates.TemplateResponse("action_center.html", {
-        "request": request,
-        "order_data": order_data,
-        "order_stats": order_stats,
-        "current_filter": status_filter,
-        "login_username": login_username,
-    })
 
 
 @orders_router.post("/action-center/approve/{order_id}")
