@@ -278,7 +278,6 @@ This is a major release featuring a complete rewrite of the frontend from Flask/
 - Sandbox Architecture (Module 07)
 - REST API Documentation (Module 09)
 - Flow Architecture (Module 10)
-- MCP Architecture (Module 41)
 - Action Center (Module 42)
 
 ### API Documentation

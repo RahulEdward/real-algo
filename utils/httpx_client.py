@@ -52,8 +52,6 @@ def request(method: str, url: str, **kwargs) -> httpx.Response:
     """
     import time
 
-    from flask import g
-
     client = get_httpx_client()
 
     # Track actual broker API call time for latency monitoring
@@ -61,11 +59,9 @@ def request(method: str, url: str, **kwargs) -> httpx.Response:
     response = client.request(method, url, **kwargs)
     broker_api_end = time.time()
 
-    # Store broker API time in Flask's g object for latency tracking
-    if hasattr(g, "latency_tracker"):
-        broker_api_time_ms = (broker_api_end - broker_api_start) * 1000
-        g.broker_api_time = broker_api_time_ms
-        logger.debug(f"Broker API call took {broker_api_time_ms:.2f}ms")
+    # Log broker API time for latency monitoring
+    broker_api_time_ms = (broker_api_end - broker_api_start) * 1000
+    logger.debug(f"Broker API call took {broker_api_time_ms:.2f}ms")
 
     # Log the actual HTTP version used (info level for visibility)
     if response.http_version:
@@ -102,8 +98,6 @@ def _create_http_client() -> httpx.Client:
     import os
     import time
 
-    from flask import g
-
     # Event hooks for tracking broker API timing
     def log_request(request):
         """Hook called before request is sent"""
@@ -116,18 +110,6 @@ def _create_http_client() -> httpx.Client:
             start_time = response.request.extensions.get("start_time")
             if start_time:
                 duration_ms = (time.time() - start_time) * 1000
-
-                # Store broker API time in Flask's g object for latency tracking
-                try:
-                    from flask import has_request_context
-
-                    if has_request_context() and hasattr(g, "latency_tracker"):
-                        g.broker_api_time = duration_ms
-                        logger.debug(f"Broker API call took {duration_ms:.2f}ms")
-                except (RuntimeError, AttributeError):
-                    # Not in Flask request context or g not available
-                    pass
-
                 logger.debug(f"Request completed in {duration_ms:.2f}ms")
         except Exception as e:
             logger.error(f"Error in response hook: {e}")

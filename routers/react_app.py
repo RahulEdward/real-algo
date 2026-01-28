@@ -441,25 +441,28 @@ async def serve_assets(filename: str):
 @react_router.get("/favicon.ico")
 async def serve_favicon():
     """Serve favicon."""
-    if not is_react_frontend_available():
+    favicon_path = FRONTEND_DIST / "favicon.ico"
+    if not favicon_path.exists():
         return Response(content="Not found", status_code=404)
-    return FileResponse(FRONTEND_DIST / "favicon.ico")
+    return FileResponse(favicon_path)
 
 
 @react_router.get("/logo.png")
 async def serve_logo():
     """Serve logo."""
-    if not is_react_frontend_available():
+    logo_path = FRONTEND_DIST / "logo.png"
+    if not logo_path.exists():
         return Response(content="Not found", status_code=404)
-    return FileResponse(FRONTEND_DIST / "logo.png")
+    return FileResponse(logo_path)
 
 
 @react_router.get("/apple-touch-icon.png")
 async def serve_apple_touch_icon():
     """Serve Apple touch icon."""
-    if not is_react_frontend_available():
+    icon_path = FRONTEND_DIST / "apple-touch-icon.png"
+    if not icon_path.exists():
         return Response(content="Not found", status_code=404)
-    return FileResponse(FRONTEND_DIST / "apple-touch-icon.png")
+    return FileResponse(icon_path)
 
 
 @react_router.get("/images/{filename:path}")

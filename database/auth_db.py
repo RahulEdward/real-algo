@@ -440,10 +440,7 @@ def verify_api_key(provided_api_key):
     """
     import hashlib
 
-    from flask import has_request_context, request
-
     from database.traffic_db import InvalidAPIKeyTracker
-    from utils.ip_helper import get_real_ip
 
     # Generate secure cache key (SHA256 hash of API key)
     # Security: Never store plaintext API key in cache
@@ -484,11 +481,8 @@ def verify_api_key(provided_api_key):
 
         # Track the invalid attempt
         try:
-            # Check if we're in a request context
-            if has_request_context():
-                client_ip = get_real_ip()
-            else:
-                client_ip = "127.0.0.1"
+            # Default to localhost if no request context available
+            client_ip = "127.0.0.1"
 
             # Hash the API key for tracking (don't store plaintext)
             api_key_hash = hashlib.sha256(provided_api_key.encode()).hexdigest()[:16]

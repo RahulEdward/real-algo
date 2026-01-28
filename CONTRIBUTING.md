@@ -273,7 +273,6 @@ realalgo/
 ├── sandbox/                  # Sandbox/paper trading mode
 ├── test/                     # Test files
 ├── docs/                     # Documentation files
-├── mcp/                      # Model Context Protocol integration
 ├── requirements.txt          # Python dependencies
 ├── package.json              # Node.js dependencies
 ├── tailwind.config.mjs       # Tailwind configuration

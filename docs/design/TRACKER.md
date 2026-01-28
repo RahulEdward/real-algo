@@ -44,7 +44,6 @@
 | 38 | Python Strategies Hosting | ✅ Complete | 2026-01-21 |
 | 39 | Strategy Module | ✅ Complete | 2026-01-21 |
 | 40 | Logout & Session Expiry | ✅ Complete | 2026-01-21 |
-| 41 | MCP Architecture | ✅ Complete | 2026-01-21 |
 | 42 | Action Center | ✅ Complete | 2026-01-21 |
 | 43 | Telegram Bot Configuration | ✅ Complete | 2026-01-21 |
 | 44 | PnL Tracker | ✅ Complete | 2026-01-21 |

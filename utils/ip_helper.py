@@ -1,13 +1,14 @@
 import logging
+from typing import Union
 
-from flask import request
+from fastapi import Request
 
 logger = logging.getLogger(__name__)
 
 
-def get_real_ip():
+def get_real_ip(request: Request) -> str:
     """
-    Get the real client IP address, handling proxy headers.
+    Get the real client IP address from FastAPI request, handling proxy headers.
 
     Checks headers in order of preference:
     1. CF-Connecting-IP (Cloudflare - highest priority since you're using Cloudflare)
@@ -15,7 +16,10 @@ def get_real_ip():
     3. X-Forwarded-For (standard proxy header, uses first IP if multiple)
     4. True-Client-IP (Cloudflare Enterprise)
     5. X-Client-IP (some proxies)
-    6. request.remote_addr (fallback to direct connection)
+    6. request.client.host (fallback to direct connection)
+
+    Args:
+        request: FastAPI Request object
 
     Returns:
         str: The most likely real client IP address
@@ -54,9 +58,9 @@ def get_real_ip():
         logger.debug(f"Using X-Client-IP: {client_ip}")
         return client_ip
 
-    # Fallback to remote_addr
-    remote_addr = request.remote_addr
-    logger.debug(f"Using request.remote_addr (direct connection): {remote_addr}")
+    # Fallback to client host
+    remote_addr = request.client.host if request.client else ""
+    logger.debug(f"Using request.client.host (direct connection): {remote_addr}")
     return remote_addr
 
 

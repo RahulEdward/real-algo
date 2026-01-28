@@ -7,14 +7,14 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# OpenAlgo Installation Banner
+# RealAlgo Installation Banner
 echo -e "${BLUE}"
-echo "  ██████╗ ██████╗ ███████╗███╗   ██╗ █████╗ ██╗      ██████╗  ██████╗ "
-echo " ██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔══██╗██║     ██╔════╝ ██╔═══██╗"
-echo " ██║   ██║██████╔╝███████╗██╔██╗ ██║███████║██║     ██║  ███╗██║   ██║"
-echo " ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██║     ██║   ██║██║   ██║"
-echo " ╚██████╔╝██╗     ███████╗██║ ╚████║██║  ██║███████╗╚██████╔╝╚██████╔╝"
-echo "  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ "      
+echo " ██████╗ ███████╗ █████╗ ██╗      █████╗ ██╗      ██████╗  ██████╗ "
+echo " ██╔══██╗██╔════╝██╔══██╗██║     ██╔══██╗██║     ██╔════╝ ██╔═══██╗"
+echo " ██████╔╝█████╗  ███████║██║     ███████║██║     ██║  ███╗██║   ██║"
+echo " ██╔══██╗██╔══╝  ██╔══██║██║     ██╔══██║██║     ██║   ██║██║   ██║"
+echo " ██║  ██║███████╗██║  ██║███████╗██║  ██║███████╗╚██████╔╝╚██████╔╝"
+echo " ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ "      
 echo "                                                                        "
 echo -e "${NC}"
 echo -e "${YELLOW}Simple HTTP Installation (No Nginx)${NC}"
@@ -191,7 +191,7 @@ if [ -z "$SERVER_IP" ]; then
 fi
 
 # Start logging
-log_message "Starting OpenAlgo Simple HTTP installation" "$BLUE"
+log_message "Starting RealAlgo Simple HTTP installation" "$BLUE"
 log_message "Server IP: $SERVER_IP" "$BLUE"
 log_message "----------------------------------------" "$BLUE"
 
@@ -203,7 +203,7 @@ check_and_configure_swap
 check_timezone
 
 # Get broker configuration FIRST
-log_message "\nOpenAlgo Configuration" "$BLUE"
+log_message "\nRealAlgo Configuration" "$BLUE"
 log_message "----------------------------------------" "$BLUE"
 
 # Get broker name
@@ -252,7 +252,7 @@ APP_KEY=$(generate_hex)
 API_KEY_PEPPER=$(generate_hex)
 
 # Now proceed with installation
-log_message "\nStarting OpenAlgo installation..." "$YELLOW"
+log_message "\nStarting RealAlgo installation..." "$YELLOW"
 
 # Basic security setup
 log_message "\nApplying basic security settings..." "$BLUE"
@@ -307,13 +307,13 @@ sudo systemctl restart fail2ban
 check_status "Failed to configure fail2ban"
 
 # Installation paths
-BASE_PATH="/var/python/openalgo"
+BASE_PATH="/var/python/realalgo"
 VENV_PATH="$BASE_PATH/venv"
-SERVICE_NAME="openalgo"
+SERVICE_NAME="realalgo"
 
 # Check existing installation
 if [ -d "$BASE_PATH" ]; then
-    log_message "Warning: OpenAlgo already installed at $BASE_PATH" "$YELLOW"
+    log_message "Warning: RealAlgo already installed at $BASE_PATH" "$YELLOW"
     read -p "Remove existing installation? (y/n): " remove_choice
     if [[ $remove_choice =~ ^[Yy]$ ]]; then
         log_message "Removing existing installation..." "$BLUE"
@@ -333,8 +333,8 @@ sudo mkdir -p $BASE_PATH
 check_status "Failed to create directory"
 
 # Clone repository
-log_message "Cloning OpenAlgo repository..." "$BLUE"
-sudo git clone https://github.com/marketcalls/openalgo.git $BASE_PATH
+log_message "Cloning RealAlgo repository..." "$BLUE"
+sudo git clone https://github.com/marketcalls/realalgo.git $BASE_PATH
 check_status "Failed to clone repository"
 
 # Create virtual environment using uv
@@ -379,7 +379,7 @@ check_status "Failed to configure environment"
 log_message "Creating systemd service..." "$BLUE"
 sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null << EOL
 [Unit]
-Description=OpenAlgo Trading Platform
+Description=RealAlgo Trading Platform
 After=network.target
 
 [Service]
@@ -436,7 +436,7 @@ ls -la $BASE_PATH
 check_status "Failed to set permissions"
 
 # Start service
-log_message "Starting OpenAlgo service..." "$BLUE"
+log_message "Starting RealAlgo service..." "$BLUE"
 sudo systemctl daemon-reload
 sudo systemctl enable $SERVICE_NAME
 sudo systemctl start $SERVICE_NAME
@@ -447,7 +447,7 @@ sleep 3
 
 # Check if service is running
 if sudo systemctl is-active --quiet $SERVICE_NAME; then
-    log_message "\nOpenAlgo is running successfully!" "$GREEN"
+    log_message "\nRealAlgo is running successfully!" "$GREEN"
 else
     log_message "\nWarning: Service may not have started properly" "$YELLOW"
     log_message "Check logs with: sudo journalctl -u $SERVICE_NAME -n 50" "$YELLOW"

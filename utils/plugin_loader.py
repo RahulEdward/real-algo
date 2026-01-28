@@ -2,8 +2,7 @@
 
 import importlib
 import os
-
-from flask import current_app
+from pathlib import Path
 
 from utils.logging import get_logger
 
@@ -11,13 +10,30 @@ logger = get_logger(__name__)
 
 
 def load_broker_auth_functions(broker_directory="broker"):
+    """
+    Load broker authentication functions from broker plugins.
+    
+    Args:
+        broker_directory: Directory containing broker plugins (default: "broker")
+        
+    Returns:
+        Dict mapping broker auth function names to their functions
+    """
     auth_functions = {}
-    broker_path = os.path.join(current_app.root_path, broker_directory)
+    
+    # Get the broker path relative to this file's location
+    root_path = Path(__file__).parent.parent
+    broker_path = root_path / broker_directory
+    
+    if not broker_path.exists():
+        logger.warning(f"Broker directory not found: {broker_path}")
+        return auth_functions
+    
     # List all items in broker directory and filter out __pycache__ and non-directories
     broker_names = [
-        d
-        for d in os.listdir(broker_path)
-        if os.path.isdir(os.path.join(broker_path, d)) and d != "__pycache__"
+        d.name
+        for d in broker_path.iterdir()
+        if d.is_dir() and d.name != "__pycache__"
     ]
 
     for broker_name in broker_names:

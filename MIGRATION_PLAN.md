@@ -85,7 +85,6 @@ realalgo/                           # EXISTING - NO CHANGES TO ROOT STRUCTURE
 ├── utils/                          # EXISTING - UNCHANGED
 ├── websocket_proxy/                # EXISTING - UNCHANGED
 ├── sandbox/                        # EXISTING - UNCHANGED
-├── mcp/                            # EXISTING - UNCHANGED
 │
 ├── templates/                      # EXISTING - Keep for backward compatibility
 │   └── (59+ files)                 # Legacy Jinja2 templates (fallback mode)

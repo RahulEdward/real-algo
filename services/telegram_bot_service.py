@@ -23,7 +23,7 @@ import httpx
 import pandas as pd
 import plotly.graph_objects as go
 import telegram.error
-from openalgo import api as openalgo_api
+from openalgo import api as realalgo_api
 from plotly.subplots import make_subplots
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Update
 from telegram.constants import ParseMode
@@ -69,7 +69,7 @@ class TelegramBotService:
         self.sdk_clients = {}  # Cache for RealAlgo SDK clients per user
         self._stop_event = original_threading.Event()  # Thread-safe stop signal
 
-    def _get_sdk_client(self, telegram_id: int) -> openalgo_api | None:
+    def _get_sdk_client(self, telegram_id: int) -> realalgo_api | None:
         """Get or create RealAlgo SDK client for a user"""
         try:
             # Check if client already exists
@@ -86,7 +86,7 @@ class TelegramBotService:
             api_key = credentials["api_key"]
 
             # Create SDK client
-            client = openalgo_api(api_key=api_key, host=host_url)
+            client = realalgo_api(api_key=api_key, host=host_url)
 
             # Cache the client
             self.sdk_clients[telegram_id] = client
@@ -883,7 +883,7 @@ class TelegramBotService:
         # Validate API key by making a test call
         try:
             # Create temporary SDK client for validation
-            test_client = openalgo_api(api_key=api_key, host=host_url)
+            test_client = realalgo_api(api_key=api_key, host=host_url)
 
             # Test with a simple call
             loop = asyncio.get_event_loop()

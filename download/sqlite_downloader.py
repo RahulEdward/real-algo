@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 from dotenv import load_dotenv
-from openalgo import api
+from realalgo import api
 from sqlalchemy import MetaData, create_engine
 
 # Load environment variables

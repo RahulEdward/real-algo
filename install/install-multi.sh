@@ -7,14 +7,14 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# OpenAlgo Multi-Instance Installation Banner
+# RealAlgo Multi-Instance Installation Banner
 echo -e "${BLUE}"
-echo "  ██████╗ ██████╗ ███████╗███╗   ██╗ █████╗ ██╗      ██████╗  ██████╗ "
-echo " ██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔══██╗██║     ██╔════╝ ██╔═══██╗"
-echo " ██║   ██║██████╔╝███████╗██╔██╗ ██║███████║██║     ██║  ███╗██║   ██║"
-echo " ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██║     ██║   ██║██║   ██║"
-echo " ╚██████╔╝██╗     ███████╗██║ ╚████║██║  ██║███████╗╚██████╔╝╚██████╔╝"
-echo "  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ "
+echo " ██████╗ ███████╗ █████╗ ██╗      █████╗ ██╗      ██████╗  ██████╗ "
+echo " ██╔══██╗██╔════╝██╔══██╗██║     ██╔══██╗██║     ██╔════╝ ██╔═══██╗"
+echo " ██████╔╝█████╗  ███████║██║     ███████║██║     ██║  ███╗██║   ██║"
+echo " ██╔══██╗██╔══╝  ██╔══██║██║     ██╔══██║██║     ██║   ██║██║   ██║"
+echo " ██║  ██║███████╗██║  ██║███████╗██║  ██║███████╗╚██████╔╝╚██████╔╝"
+echo " ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ "
 echo "                      MULTI-INSTANCE INSTALLER                          "
 echo -e "${NC}"
 
@@ -93,7 +93,7 @@ check_timezone() {
 }
 
 # Start logging
-log_message "Starting OpenAlgo Multi-Instance installation" "$BLUE"
+log_message "Starting RealAlgo Multi-Instance installation" "$BLUE"
 log_message "Log file: $LOG_FILE" "$BLUE"
 log_message "----------------------------------------" "$BLUE"
 
@@ -102,7 +102,7 @@ check_timezone
 
 # Ask number of instances
 while true; do
-    read -p "How many OpenAlgo instances do you want to set up? " INSTANCES
+    read -p "How many RealAlgo instances do you want to set up? " INSTANCES
     if [[ "$INSTANCES" =~ ^[0-9]+$ ]] && [ "$INSTANCES" -gt 0 ]; then
         break
     else
@@ -110,11 +110,11 @@ while true; do
     fi
 done
 
-log_message "Setting up $INSTANCES OpenAlgo instances" "$GREEN"
+log_message "Setting up $INSTANCES RealAlgo instances" "$GREEN"
 
 # Base configuration
-BASE_DIR="/var/python/openalgo-flask"
-REPO_URL="https://github.com/marketcalls/openalgo.git"
+BASE_DIR="/var/python/realalgo-flask"
+REPO_URL="https://github.com/marketcalls/realalgo.git"
 FLASK_PORT_BASE=5000
 WS_PORT_BASE=8765
 ZMQ_PORT_BASE=5555
@@ -243,10 +243,10 @@ for ((i=1; i<=INSTANCES; i++)); do
 
     # Paths
     DEPLOY_NAME="${DOMAIN/./-}-${BROKER}"
-    INSTANCE_DIR="$BASE_DIR/openalgo$i"
+    INSTANCE_DIR="$BASE_DIR/realalgo$i"
     VENV_PATH="$INSTANCE_DIR/venv"
-    SOCKET_FILE="$INSTANCE_DIR/openalgo.sock"
-    SERVICE_NAME="openalgo$i"
+    SOCKET_FILE="$INSTANCE_DIR/realalgo.sock"
+    SERVICE_NAME="realalgo$i"
 
     # Ports
     FLASK_PORT=$((FLASK_PORT_BASE + i - 1))
@@ -294,7 +294,7 @@ for ((i=1; i<=INSTANCES; i++)); do
     API_KEY_PEPPER=$(generate_hex)
 
     # Database paths
-    DB_PATH="sqlite:///db/openalgo${i}.db"
+    DB_PATH="sqlite:///db/realalgo${i}.db"
     LATENCY_DB="sqlite:///db/latency${i}.db"
     LOGS_DB="sqlite:///db/logs${i}.db"
 
@@ -501,7 +501,7 @@ EOL
     log_message "Creating systemd service..." "$BLUE"
     sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null << EOL
 [Unit]
-Description=OpenAlgo Instance $i ($DOMAIN - $BROKER)
+Description=RealAlgo Instance $i ($DOMAIN - $BROKER)
 After=network.target
 
 [Service]
@@ -550,15 +550,15 @@ for ((i=1; i<=INSTANCES; i++)); do
     log_message "\nInstance $i:" "$BLUE"
     log_message "  Domain: https://${DOMAINS[$idx]}" "$GREEN"
     log_message "  Broker: ${BROKERS[$idx]}" "$BLUE"
-    log_message "  Service: openalgo$i" "$BLUE"
-    log_message "  Directory: $BASE_DIR/openalgo$i" "$BLUE"
+    log_message "  Service: realalgo$i" "$BLUE"
+    log_message "  Directory: $BASE_DIR/realalgo$i" "$BLUE"
 done
 
 log_message "\n📚 USEFUL COMMANDS:" "$YELLOW"
-log_message "View all services: systemctl list-units 'openalgo*'" "$BLUE"
-log_message "Restart instance: sudo systemctl restart openalgo<N>" "$BLUE"
-log_message "View logs: sudo journalctl -u openalgo<N> -f" "$BLUE"
-log_message "Check status: sudo systemctl status openalgo<N>" "$BLUE"
+log_message "View all services: systemctl list-units 'realalgo*'" "$BLUE"
+log_message "Restart instance: sudo systemctl restart realalgo<N>" "$BLUE"
+log_message "View logs: sudo journalctl -u realalgo<N> -f" "$BLUE"
+log_message "Check status: sudo systemctl status realalgo<N>" "$BLUE"
 
 log_message "\n📝 Installation log saved to: $LOG_FILE" "$BLUE"
 log_message "\n🎉 All instances are ready to use!" "$GREEN"

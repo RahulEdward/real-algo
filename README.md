@@ -70,9 +70,6 @@ Host and run Python strategies directly:
 ### ChartInk Integration
 Direct webhook integration for scanner alerts with BUY, SELL, SHORT, COVER actions.
 
-### AI-Powered Trading (MCP Server)
-Connect AI assistants (Claude Desktop, Cursor, Windsurf, ChatGPT) for natural language trading.
-
 ### Telegram Bot Integration
 Real-time notifications, order alerts, positions, holdings, and interactive commands.
 

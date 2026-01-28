@@ -288,16 +288,8 @@ class TelegramAlertService:
                 logger.warning(
                     f"No username found for telegram alert - api_key present: {bool(api_key_used)}, api_key_length: {len(api_key_used) if api_key_used else 0}"
                 )
-                # Try to get username from session if available
-                try:
-                    from flask import has_request_context, session
-
-                    if has_request_context() and session.get("user"):
-                        username = session.get("user")
-                        logger.info(f"Using username from session: {username}")
-                except:
-                    pass
-
+                # Note: Session access is not available in service layer
+                # Username should be passed explicitly from the calling endpoint
                 if not username:
                     return
 

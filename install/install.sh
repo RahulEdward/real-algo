@@ -6,18 +6,18 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# openalgo Installation Banner
+# RealAlgo Installation Banner
 echo -e "${BLUE}"
-echo "  ██████╗ ██████╗ ███████╗███╗   ██╗ █████╗ ██╗      ██████╗  ██████╗ "
-echo " ██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔══██╗██║     ██╔════╝ ██╔═══██╗"
-echo " ██║   ██║██████╔╝███████╗██╔██╗ ██║███████║██║     ██║  ███╗██║   ██║"
-echo " ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██║     ██║   ██║██║   ██║"
-echo " ╚██████╔╝██╗     ███████╗██║ ╚████║██║  ██║███████╗╚██████╔╝╚██████╔╝"
-echo "  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ "      
+echo " ██████╗ ███████╗ █████╗ ██╗      █████╗ ██╗      ██████╗  ██████╗ "
+echo " ██╔══██╗██╔════╝██╔══██╗██║     ██╔══██╗██║     ██╔════╝ ██╔═══██╗"
+echo " ██████╔╝█████╗  ███████║██║     ███████║██║     ██║  ███╗██║   ██║"
+echo " ██╔══██╗██╔══╝  ██╔══██║██║     ██╔══██║██║     ██║   ██║██║   ██║"
+echo " ██║  ██║███████╗██║  ██║███████╗██║  ██║███████╗╚██████╔╝╚██████╔╝"
+echo " ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ "      
 echo "                                                                        "
 echo -e "${NC}"
 
-# OpenAlgo Installation and Configuration Script
+# RealAlgo Installation and Configuration Script
 
 
 
@@ -248,7 +248,7 @@ check_and_configure_swap() {
 }
 
 # Start logging
-log_message "Starting OpenAlgo installation log at: $LOG_FILE" "$BLUE"
+log_message "Starting RealAlgo installation log at: $LOG_FILE" "$BLUE"
 log_message "----------------------------------------" "$BLUE"
 
 # Detect OS type and version
@@ -327,7 +327,7 @@ check_and_configure_swap
 check_timezone
 
 # Collect installation parameters
-log_message "OpenAlgo Installation Configuration" "$BLUE"
+log_message "RealAlgo Installation Configuration" "$BLUE"
 log_message "----------------------------------------" "$BLUE"
 
 # Get domain name
@@ -401,12 +401,12 @@ API_KEY_PEPPER=$(generate_hex)
 
 # Installation paths with unique deployment name
 DEPLOY_NAME="${DOMAIN/./-}-${BROKER_NAME}"  # e.g., opendash-app-fyers
-BASE_PATH="/var/python/openalgo-flask/$DEPLOY_NAME"
-OPENALGO_PATH="$BASE_PATH/openalgo"
+BASE_PATH="/var/python/realalgo-flask/$DEPLOY_NAME"
+REALALGO_PATH="$BASE_PATH/realalgo"
 VENV_PATH="$BASE_PATH/venv"
 SOCKET_PATH="$BASE_PATH"
-SOCKET_FILE="$SOCKET_PATH/openalgo.sock"
-SERVICE_NAME="openalgo-$DEPLOY_NAME"
+SOCKET_FILE="$SOCKET_PATH/realalgo.sock"
+SERVICE_NAME="realalgo-$DEPLOY_NAME"
 
 # Set Nginx configuration paths based on OS
 case "$OS_TYPE" in
@@ -425,7 +425,7 @@ case "$OS_TYPE" in
 esac
 NGINX_CONFIG_FILE="$NGINX_AVAILABLE/$DOMAIN.conf"
 
-log_message "\nStarting OpenAlgo installation for $DEPLOY_NAME..." "$YELLOW"
+log_message "\nStarting RealAlgo installation for $DEPLOY_NAME..." "$YELLOW"
 
 # Update system packages
 log_message "\nUpdating system packages..." "$BLUE"
@@ -602,8 +602,8 @@ if ! command -v certbot >/dev/null 2>&1; then
 fi
 log_message "Certbot installed successfully" "$GREEN"
 
-# Check and handle existing OpenAlgo installation
-handle_existing "$BASE_PATH" "installation directory" "OpenAlgo directory for $DEPLOY_NAME"
+# Check and handle existing RealAlgo installation
+handle_existing "$BASE_PATH" "installation directory" "RealAlgo directory for $DEPLOY_NAME"
 
 # Create base directory
 log_message "\nCreating base directory..." "$BLUE"
@@ -611,9 +611,9 @@ sudo mkdir -p $BASE_PATH
 check_status "Failed to create base directory"
 
 # Clone repository
-log_message "\nCloning OpenAlgo repository..." "$BLUE"
-sudo git clone https://github.com/marketcalls/openalgo.git $OPENALGO_PATH
-check_status "Failed to clone OpenAlgo repository"
+log_message "\nCloning RealAlgo repository..." "$BLUE"
+sudo git clone https://github.com/marketcalls/realalgo.git $REALALGO_PATH
+check_status "Failed to clone RealAlgo repository"
 
 # Create virtual environment using uv
 log_message "\nSetting up Python virtual environment with uv..." "$BLUE"
@@ -647,7 +647,7 @@ log_message "\nInstalling Python dependencies with uv..." "$BLUE"
 # First activate the virtual environment path for uv
 ACTIVATE_CMD="source $VENV_PATH/bin/activate"
 # Install dependencies using uv
-sudo $UV_CMD pip install --python $VENV_PATH/bin/python -r $OPENALGO_PATH/requirements-nginx.txt
+sudo $UV_CMD pip install --python $VENV_PATH/bin/python -r $REALALGO_PATH/requirements-nginx.txt
 check_status "Failed to install Python dependencies"
 
 # Verify gunicorn and eventlet installation
@@ -665,29 +665,29 @@ fi
 
 # Configure .env file
 log_message "\nConfiguring environment file..." "$BLUE"
-handle_existing "$OPENALGO_PATH/.env" "environment file" ".env file"
+handle_existing "$REALALGO_PATH/.env" "environment file" ".env file"
 
-sudo cp $OPENALGO_PATH/.sample.env $OPENALGO_PATH/.env
-sudo sed -i "s|YOUR_BROKER_API_KEY|$BROKER_API_KEY|g" $OPENALGO_PATH/.env
-sudo sed -i "s|YOUR_BROKER_API_SECRET|$BROKER_API_SECRET|g" $OPENALGO_PATH/.env
+sudo cp $REALALGO_PATH/.sample.env $REALALGO_PATH/.env
+sudo sed -i "s|YOUR_BROKER_API_KEY|$BROKER_API_KEY|g" $REALALGO_PATH/.env
+sudo sed -i "s|YOUR_BROKER_API_SECRET|$BROKER_API_SECRET|g" $REALALGO_PATH/.env
 
 # Update market data API credentials if the broker is XTS-based
 if is_xts_broker "$BROKER_NAME"; then
-    sudo sed -i "s|YOUR_BROKER_MARKET_API_KEY|$BROKER_API_KEY_MARKET|g" $OPENALGO_PATH/.env
-    sudo sed -i "s|YOUR_BROKER_MARKET_API_SECRET|$BROKER_API_SECRET_MARKET|g" $OPENALGO_PATH/.env
+    sudo sed -i "s|YOUR_BROKER_MARKET_API_KEY|$BROKER_API_KEY_MARKET|g" $REALALGO_PATH/.env
+    sudo sed -i "s|YOUR_BROKER_MARKET_API_SECRET|$BROKER_API_SECRET_MARKET|g" $REALALGO_PATH/.env
 fi
 
-sudo sed -i "s|http://127.0.0.1:5000|https://$DOMAIN|g" $OPENALGO_PATH/.env
-sudo sed -i "s|<broker>|$BROKER_NAME|g" $OPENALGO_PATH/.env
-sudo sed -i "s|3daa0403ce2501ee7432b75bf100048e3cf510d63d2754f952e93d88bf07ea84|$APP_KEY|g" $OPENALGO_PATH/.env
-sudo sed -i "s|a25d94718479b170c16278e321ea6c989358bf499a658fd20c90033cef8ce772|$API_KEY_PEPPER|g" $OPENALGO_PATH/.env
+sudo sed -i "s|http://127.0.0.1:5000|https://$DOMAIN|g" $REALALGO_PATH/.env
+sudo sed -i "s|<broker>|$BROKER_NAME|g" $REALALGO_PATH/.env
+sudo sed -i "s|3daa0403ce2501ee7432b75bf100048e3cf510d63d2754f952e93d88bf07ea84|$APP_KEY|g" $REALALGO_PATH/.env
+sudo sed -i "s|a25d94718479b170c16278e321ea6c989358bf499a658fd20c90033cef8ce772|$API_KEY_PEPPER|g" $REALALGO_PATH/.env
 
 # Update WebSocket URL for production
-sudo sed -i "s|WEBSOCKET_URL='.*'|WEBSOCKET_URL='wss://$DOMAIN/ws'|g" $OPENALGO_PATH/.env
+sudo sed -i "s|WEBSOCKET_URL='.*'|WEBSOCKET_URL='wss://$DOMAIN/ws'|g" $REALALGO_PATH/.env
 
 # Update host bindings to allow external connections
-sudo sed -i "s|WEBSOCKET_HOST='127.0.0.1'|WEBSOCKET_HOST='0.0.0.0'|g" $OPENALGO_PATH/.env
-sudo sed -i "s|ZMQ_HOST='127.0.0.1'|ZMQ_HOST='0.0.0.0'|g" $OPENALGO_PATH/.env
+sudo sed -i "s|WEBSOCKET_HOST='127.0.0.1'|WEBSOCKET_HOST='0.0.0.0'|g" $REALALGO_PATH/.env
+sudo sed -i "s|ZMQ_HOST='127.0.0.1'|ZMQ_HOST='0.0.0.0'|g" $REALALGO_PATH/.env
 
 check_status "Failed to configure environment file"
 
@@ -947,19 +947,19 @@ sudo nginx -t
 check_status "Failed to validate Nginx configuration"
 
 # Check and handle existing systemd service
-handle_existing "/etc/systemd/system/$SERVICE_NAME.service" "systemd service" "OpenAlgo service file"
+handle_existing "/etc/systemd/system/$SERVICE_NAME.service" "systemd service" "RealAlgo service file"
 
 # Create systemd service with unique name
 log_message "\nCreating systemd service..." "$BLUE"
 sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null << EOL
 [Unit]
-Description=OpenAlgo Gunicorn Daemon ($DEPLOY_NAME)
+Description=RealAlgo Gunicorn Daemon ($DEPLOY_NAME)
 After=network.target
 
 [Service]
 User=$WEB_USER
 Group=$WEB_GROUP
-WorkingDirectory=$OPENALGO_PATH
+WorkingDirectory=$REALALGO_PATH
 # Simplified approach to ensure Python environment is properly loaded
 ExecStart=/bin/bash -c 'source $VENV_PATH/bin/activate && $VENV_PATH/bin/gunicorn \
     --worker-class eventlet \
@@ -985,18 +985,18 @@ sudo chown -R $WEB_USER:$WEB_GROUP $BASE_PATH
 sudo chmod -R 755 $BASE_PATH
 
 # Create and set permissions for required directories
-sudo mkdir -p $OPENALGO_PATH/db
-sudo mkdir -p $OPENALGO_PATH/tmp
+sudo mkdir -p $REALALGO_PATH/db
+sudo mkdir -p $REALALGO_PATH/tmp
 # Create directories for Python strategy feature
-sudo mkdir -p $OPENALGO_PATH/strategies/scripts
-sudo mkdir -p $OPENALGO_PATH/strategies/examples
-sudo mkdir -p $OPENALGO_PATH/log/strategies
-sudo mkdir -p $OPENALGO_PATH/keys
+sudo mkdir -p $REALALGO_PATH/strategies/scripts
+sudo mkdir -p $REALALGO_PATH/strategies/examples
+sudo mkdir -p $REALALGO_PATH/log/strategies
+sudo mkdir -p $REALALGO_PATH/keys
 # Set ownership and permissions
-sudo chown -R $WEB_USER:$WEB_GROUP $OPENALGO_PATH
-sudo chmod -R 755 $OPENALGO_PATH
+sudo chown -R $WEB_USER:$WEB_GROUP $REALALGO_PATH
+sudo chmod -R 755 $REALALGO_PATH
 # Set more restrictive permissions for sensitive directories
-sudo chmod 700 $OPENALGO_PATH/keys
+sudo chmod 700 $REALALGO_PATH/keys
 
 # Remove existing socket file if it exists
 [ -S "$SOCKET_FILE" ] && sudo rm -f $SOCKET_FILE
@@ -1006,7 +1006,7 @@ sudo chmod 755 $SOCKET_PATH
 
 # Verify permissions
 log_message "\nVerifying permissions..." "$BLUE"
-ls -la $OPENALGO_PATH
+ls -la $REALALGO_PATH
 check_status "Failed to set permissions"
 
 # Reload systemd and start services
@@ -1055,8 +1055,8 @@ log_message "Operating System: $OS_TYPE $OS_VERSION" "$BLUE"
 log_message "Deployment Name: $DEPLOY_NAME" "$BLUE"
 log_message "Domain: $DOMAIN" "$BLUE"
 log_message "Broker: $BROKER_NAME" "$BLUE"
-log_message "Installation Directory: $OPENALGO_PATH" "$BLUE"
-log_message "Environment File: $OPENALGO_PATH/.env" "$BLUE"
+log_message "Installation Directory: $REALALGO_PATH" "$BLUE"
+log_message "Environment File: $REALALGO_PATH/.env" "$BLUE"
 log_message "Socket File: $SOCKET_FILE" "$BLUE"
 log_message "Service Name: $SERVICE_NAME" "$BLUE"
 log_message "Nginx Config: $NGINX_CONFIG_FILE" "$BLUE"
@@ -1064,13 +1064,13 @@ log_message "SSL: Enabled with Let's Encrypt" "$BLUE"
 log_message "Installation Log: $LOG_FILE" "$BLUE"
 
 log_message "\nNext Steps:" "$YELLOW"
-log_message "1. Visit https://$DOMAIN to access your OpenAlgo instance" "$GREEN"
+log_message "1. Visit https://$DOMAIN to access your RealAlgo instance" "$GREEN"
 log_message "2. Configure your broker settings in the web interface" "$GREEN"
 log_message "3. Review the logs using: sudo journalctl -u $SERVICE_NAME" "$GREEN"
 log_message "4. Monitor the application status: sudo systemctl status $SERVICE_NAME" "$GREEN"
 
 log_message "\nUseful Commands:" "$YELLOW"
-log_message "Restart OpenAlgo: sudo systemctl restart $SERVICE_NAME" "$BLUE"
+log_message "Restart RealAlgo: sudo systemctl restart $SERVICE_NAME" "$BLUE"
 log_message "View Logs: sudo journalctl -u $SERVICE_NAME" "$BLUE"
 log_message "Check Status: sudo systemctl status $SERVICE_NAME" "$BLUE"
 log_message "View Installation Log: cat $LOG_FILE" "$BLUE"

@@ -5,7 +5,7 @@ import time
 from datetime import datetime, timedelta
 
 import pandas as pd
-from openalgo import api
+from realalgo import api
 
 # Initialize the API client
 client = api(api_key="your_api_key_here", host="http://127.0.0.1:5000")
