@@ -1,6 +1,6 @@
 import json
 
-from flask import session
+from utils.session_compat import session
 
 from broker.pocketful.mapping.transform_data import (
     map_product_type,

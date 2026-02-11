@@ -262,7 +262,7 @@ def squareoff_positions(strategy_id):
 @strategy_router.get("/")
 async def index(request: Request, session: dict = Depends(get_session)):
     """List all strategies"""
-    if not is_session_valid():
+    if not is_session_valid(session):
         return RedirectResponse(url="/auth/login", status_code=302)
 
     user_id = session.get("user")
@@ -352,7 +352,7 @@ async def new_strategy_post(request: Request, session: dict = Depends(check_sess
 @strategy_router.get("/{strategy_id}")
 async def view_strategy(strategy_id: int, request: Request, session: dict = Depends(get_session)):
     """View strategy details"""
-    if not is_session_valid():
+    if not is_session_valid(session):
         return RedirectResponse(url="/auth/login", status_code=302)
 
     strategy = get_strategy(strategy_id)
@@ -372,7 +372,7 @@ async def view_strategy(strategy_id: int, request: Request, session: dict = Depe
 @strategy_router.post("/toggle/{strategy_id}")
 async def toggle_strategy_route(strategy_id: int, request: Request, session: dict = Depends(get_session)):
     """Toggle strategy active status"""
-    if not is_session_valid():
+    if not is_session_valid(session):
         return RedirectResponse(url="/auth/login", status_code=302)
 
     try:

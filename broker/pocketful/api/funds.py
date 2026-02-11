@@ -4,7 +4,7 @@ import json
 import os
 
 import httpx
-from flask import session
+from utils.session_compat import session
 
 from utils.httpx_client import get_httpx_client
 from utils.logging import get_logger

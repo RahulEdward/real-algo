@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 import pytz
-from flask import session
+from utils.session_compat import session
 
 from broker.wisdom.api.auth_api import get_feed_token as refresh_feed_token
 from broker.wisdom.baseurl import MARKET_DATA_URL

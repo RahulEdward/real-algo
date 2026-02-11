@@ -145,7 +145,15 @@ def handle_auth_success_fastapi(
         init_broker_status(broker)
         
         # Start master contract download in background thread
-        thread = Thread(target=async_master_contract_download, args=(broker,))
+        # Populate thread-local session for broker modules that need session data
+        from utils.session_compat import populate_session_for_thread
+        session_data = dict(session)
+        
+        def _download_with_session(broker_name, sess_data):
+            populate_session_for_thread(sess_data)
+            async_master_contract_download(broker_name)
+        
+        thread = Thread(target=_download_with_session, args=(broker, session_data))
         thread.start()
         logger.info(f"Started master contract download thread for broker: {broker}")
         

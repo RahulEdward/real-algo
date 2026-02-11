@@ -1,7 +1,7 @@
 # Mapping RealAlgo API Request https://realalgo.in/docs
 # Mapping ibullssecurities Broking Parameters https://symphonyfintech.com/xts-trading-front-end-api/
 
-from flask import session
+from utils.session_compat import session
 
 from broker.ibulls.api.data import BrokerData
 from database.auth_db import get_auth_token, get_feed_token

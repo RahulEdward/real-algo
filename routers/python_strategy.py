@@ -1093,7 +1093,7 @@ init_scheduler()
 async def index(request: Request, session: dict = Depends(get_session)):
     """Main dashboard"""
     from utils.session import is_session_valid
-    if not is_session_valid():
+    if not is_session_valid(session):
         return RedirectResponse(url="/auth/login", status_code=302)
 
     initialize_with_app_context()
