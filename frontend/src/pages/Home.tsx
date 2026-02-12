@@ -23,9 +23,9 @@ export default function Home() {
   const navLinks = [
     { href: '/', label: 'Home', internal: true },
     { href: '/faq', label: 'FAQ', internal: true },
-    { href: 'https://openalgo.in/discord', label: 'Community', internal: false },
-    { href: 'https://openalgo.in/roadmap', label: 'Roadmap', internal: false },
-    { href: 'https://docs.openalgo.in', label: 'Docs', internal: false },
+    { href: 'https://realalgo.in/discord', label: 'Community', internal: false },
+    { href: 'https://realalgo.in/roadmap', label: 'Roadmap', internal: false },
+    { href: 'https://docs.realalgo.in', label: 'Docs', internal: false },
   ]
 
   return (
@@ -44,8 +44,8 @@ export default function Home() {
               </SheetTrigger>
               <SheetContent side="left" className="w-80">
                 <div className="flex items-center gap-2 mb-8">
-                  <img src="/logo.png" alt="OpenAlgo" className="h-8 w-8" />
-                  <span className="text-xl font-semibold">OpenAlgo</span>
+                  <img src="/logo.png" alt="RealAlgo" className="h-8 w-8" />
+                  <span className="text-xl font-semibold">RealAlgo</span>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Link
@@ -86,7 +86,7 @@ export default function Home() {
                     Download
                   </Link>
                   <a
-                    href="https://openalgo.in/discord"
+                    href="https://realalgo.in/discord"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
@@ -95,7 +95,7 @@ export default function Home() {
                     Community
                   </a>
                   <a
-                    href="https://openalgo.in/roadmap"
+                    href="https://realalgo.in/roadmap"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
@@ -104,7 +104,7 @@ export default function Home() {
                     Roadmap
                   </a>
                   <a
-                    href="https://docs.openalgo.in"
+                    href="https://docs.realalgo.in"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
@@ -117,8 +117,8 @@ export default function Home() {
             </Sheet>
 
             <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.png" alt="OpenAlgo" className="h-8 w-8" />
-              <span className="text-xl font-bold hidden sm:inline">OpenAlgo</span>
+              <img src="/logo.png" alt="RealAlgo" className="h-8 w-8" />
+              <span className="text-xl font-bold hidden sm:inline">RealAlgo</span>
             </Link>
           </div>
 

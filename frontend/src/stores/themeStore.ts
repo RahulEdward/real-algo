@@ -170,7 +170,7 @@ export const useThemeStore = create<ThemeStore>()(
       },
     }),
     {
-      name: 'openalgo-theme',
+      name: 'realalgo-theme',
       partialize: (state) => ({
         mode: state.mode,
         color: state.color,

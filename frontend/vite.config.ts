@@ -33,6 +33,38 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
+      '/gex': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/ivchart': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/ivsmile': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/oiprofile': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/oitracker': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/straddle': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/volsurface': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/health': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
     },
   },
   build: {

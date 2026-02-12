@@ -137,7 +137,7 @@ export function Navbar() {
                   </Link>
                 ))}
                 <a
-                  href="https://docs.openalgo.in"
+                  href="https://docs.realalgo.in"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors min-h-[44px] touch-manipulation hover:bg-muted active:bg-muted"
@@ -257,7 +257,7 @@ export function Navbar() {
               ))}
               <DropdownMenuItem asChild>
                 <a
-                  href="https://docs.openalgo.in"
+                  href="https://docs.realalgo.in"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"

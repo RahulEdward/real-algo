@@ -150,10 +150,10 @@ export default function Login() {
           <Card className="w-full max-w-md order-1 lg:order-2 shadow-xl">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
-                <img src="/logo.png" alt="OpenAlgo" className="h-20 w-20" />
+                <img src="/logo.png" alt="RealAlgo" className="h-20 w-20" />
               </div>
               <CardTitle className="text-2xl">Welcome Back</CardTitle>
-              <CardDescription>Sign in to your OpenAlgo account</CardDescription>
+              <CardDescription>Sign in to your RealAlgo account</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -236,7 +236,7 @@ export default function Login() {
           {/* Welcome Content - Second on mobile */}
           <div className="flex-1 max-w-xl text-center lg:text-left order-2 lg:order-1">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-              Welcome to <span className="text-primary">OpenAlgo</span>
+              Welcome to <span className="text-primary">RealAlgo</span>
             </h1>
             <p className="text-lg lg:text-xl mb-8 text-muted-foreground">
               Sign in to your account to access your trading dashboard and manage your algorithmic
@@ -265,7 +265,7 @@ export default function Login() {
               </Button>
               <Button variant="outline" asChild>
                 <a
-                  href="https://openalgo.in/discord"
+                  href="https://realalgo.in/discord"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"

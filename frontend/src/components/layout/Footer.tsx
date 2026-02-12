@@ -73,7 +73,7 @@ export function Footer({ className }: FooterProps) {
             title="Join our Discord community"
           >
             <a
-              href="https://openalgo.in/discord"
+              href="https://realalgo.in/discord"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Discord"

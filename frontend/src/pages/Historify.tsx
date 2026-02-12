@@ -1539,7 +1539,7 @@ export default function Historify() {
                 ))}
                 <DropdownMenuItem asChild>
                   <a
-                    href="https://docs.openalgo.in"
+                    href="https://docs.realalgo.in"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2"

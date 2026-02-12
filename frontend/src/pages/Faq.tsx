@@ -127,9 +127,9 @@ export default function Faq() {
   const navLinks = [
     { href: '/', label: 'Home', internal: true },
     { href: '/faq', label: 'FAQ', internal: true },
-    { href: 'https://openalgo.in/discord', label: 'Community', internal: false },
-    { href: 'https://openalgo.in/roadmap', label: 'Roadmap', internal: false },
-    { href: 'https://docs.openalgo.in', label: 'Docs', internal: false },
+    { href: 'https://realalgo.in/discord', label: 'Community', internal: false },
+    { href: 'https://realalgo.in/roadmap', label: 'Roadmap', internal: false },
+    { href: 'https://docs.realalgo.in', label: 'Docs', internal: false },
   ]
 
   return (
@@ -190,7 +190,7 @@ export default function Faq() {
                     Download
                   </Link>
                   <a
-                    href="https://openalgo.in/discord"
+                    href="https://realalgo.in/discord"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
@@ -199,7 +199,7 @@ export default function Faq() {
                     Community
                   </a>
                   <a
-                    href="https://openalgo.in/roadmap"
+                    href="https://realalgo.in/roadmap"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
@@ -208,7 +208,7 @@ export default function Faq() {
                     Roadmap
                   </a>
                   <a
-                    href="https://docs.openalgo.in"
+                    href="https://docs.realalgo.in"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-accent"
@@ -319,7 +319,7 @@ export default function Faq() {
                     Comprehensive guides and API references
                   </p>
                   <Button variant="outline" asChild>
-                    <a href="https://docs.openalgo.in" target="_blank" rel="noopener noreferrer">
+                    <a href="https://docs.realalgo.in" target="_blank" rel="noopener noreferrer">
                       Read Docs
                     </a>
                   </Button>
@@ -336,7 +336,7 @@ export default function Faq() {
                     Join our active community for support
                   </p>
                   <Button variant="outline" asChild>
-                    <a href="https://openalgo.in/discord" target="_blank" rel="noopener noreferrer">
+                    <a href="https://realalgo.in/discord" target="_blank" rel="noopener noreferrer">
                       Join Discord
                     </a>
                   </Button>

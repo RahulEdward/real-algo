@@ -138,4 +138,4 @@ export const DEFAULT_PREFERENCES: OptionChainPreferences = {
   barStyle: 'gradient',
 }
 
-export const LOCALSTORAGE_KEY = 'openalgo_option_chain_prefs'
+export const LOCALSTORAGE_KEY = 'realalgo_option_chain_prefs'
