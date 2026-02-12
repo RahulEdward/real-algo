@@ -18,6 +18,7 @@ import {
   TrendingUp,
   User,
   Workflow,
+  Wrench,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -59,6 +60,7 @@ export const profileMenuItems: NavItem[] = [
   { href: '/apikey', label: 'API Key', icon: Key },
   { href: '/telegram', label: 'Telegram Bot', icon: MessageSquare },
   { href: '/holdings', label: 'Holdings', icon: ClipboardList },
+  { href: '/tools', label: 'Tools Hub', icon: Wrench },
   { href: '/flow', label: 'Flow Editor', icon: Workflow },
   { href: '/python', label: 'Python Strategies', icon: Code2 },
   { href: '/pnl-tracker', label: 'PnL Tracker', icon: BarChart3 },

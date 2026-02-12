@@ -92,6 +92,16 @@ const SecurityDashboard = lazy(() => import('@/pages/monitoring/SecurityDashboar
 const TrafficDashboard = lazy(() => import('@/pages/monitoring/TrafficDashboard'))
 const LatencyDashboard = lazy(() => import('@/pages/monitoring/LatencyDashboard'))
 
+// Tools Hub pages
+const ToolsIndex = lazy(() => import('@/pages/tools/ToolsIndex'))
+const GEXPage = lazy(() => import('@/pages/tools/GEXPage'))
+const IVChartPage = lazy(() => import('@/pages/tools/IVChartPage'))
+const IVSmilePage = lazy(() => import('@/pages/tools/IVSmilePage'))
+const OIProfilePage = lazy(() => import('@/pages/tools/OIProfilePage'))
+const OITrackerPage = lazy(() => import('@/pages/tools/OITrackerPage'))
+const StraddlePage = lazy(() => import('@/pages/tools/StraddlePage'))
+const VolSurfacePage = lazy(() => import('@/pages/tools/VolSurfacePage'))
+
 function App() {
   return (
     <Providers>
@@ -179,6 +189,15 @@ function App() {
                 {/* Phase 7: Settings & Action Center */}
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/action-center" element={<ActionCenter />} />
+                {/* Tools Hub */}
+                <Route path="/tools" element={<ToolsIndex />} />
+                <Route path="/tools/gex" element={<GEXPage />} />
+                <Route path="/tools/ivchart" element={<IVChartPage />} />
+                <Route path="/tools/ivsmile" element={<IVSmilePage />} />
+                <Route path="/tools/oiprofile" element={<OIProfilePage />} />
+                <Route path="/tools/oitracker" element={<OITrackerPage />} />
+                <Route path="/tools/straddle" element={<StraddlePage />} />
+                <Route path="/tools/volsurface" element={<VolSurfacePage />} />
               </Route>
 
               {/* Full-width protected routes */}
