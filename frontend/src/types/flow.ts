@@ -728,8 +728,8 @@ export interface WorkflowState {
 
 /** Settings State */
 export interface SettingsState {
-  realalgo_host: string
-  realalgo_ws_url: string
+  openalgo_host: string
+  openalgo_ws_url: string
   is_configured: boolean
   has_api_key: boolean
 }

@@ -1,7 +1,7 @@
 import { Eye, EyeOff, Github, Info, Loader2, LogIn, MessageCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -58,7 +58,6 @@ export default function Login() {
         }
         // If session check fails (401, etc.), just stay on login page
       } catch (err) {
-        console.error('Failed to check setup status:', err)
       } finally {
         setIsCheckingSetup(false)
       }
@@ -78,7 +77,6 @@ export default function Login() {
       })
 
       if (!csrfResponse.ok) {
-        console.error('CSRF fetch failed:', csrfResponse.status, csrfResponse.statusText)
         setError('Failed to initialize login. Please refresh the page.')
         setIsLoading(false)
         return
@@ -86,25 +84,22 @@ export default function Login() {
 
       const csrfData = await csrfResponse.json()
 
-      // Create form data (without CSRF token - it goes in header)
+      // Create form data with CSRF token (matches original Flask template approach)
       const formData = new FormData()
       formData.append('username', username)
       formData.append('password', password)
+      formData.append('csrf_token', csrfData.csrf_token)
 
-      // Use native fetch with CSRF token in header
+      // Use native fetch like the original template
       const response = await fetch('/auth/login', {
         method: 'POST',
         body: formData,
         credentials: 'include',
-        headers: {
-          'X-CSRF-Token': csrfData.csrf_token,
-        },
       })
 
       // Check content type before parsing
       const contentType = response.headers.get('content-type')
       if (!contentType || !contentType.includes('application/json')) {
-        console.error('Login response is not JSON:', contentType)
         // If redirected to setup page, inform user
         if (response.url.includes('/setup')) {
           setError('Please complete initial setup first.')
@@ -127,12 +122,11 @@ export default function Login() {
       } else {
         // Set login state (broker will be set after broker selection)
         setLogin(username, '')
-        toast.success('Login successful')
+        showToast.success('Login successful', 'system')
         // Use redirect from response if provided, otherwise go to broker
         navigate(data.redirect || '/broker')
       }
     } catch (err) {
-      console.error('Login error:', err)
       setError('Login failed. Please try again.')
     } finally {
       setIsLoading(false)
@@ -156,10 +150,10 @@ export default function Login() {
           <Card className="w-full max-w-md order-1 lg:order-2 shadow-xl">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
-                <img src="/logo.png" alt="RealAlgo" className="h-20 w-20" />
+                <img src="/logo.png" alt="OpenAlgo" className="h-20 w-20" />
               </div>
               <CardTitle className="text-2xl">Welcome Back</CardTitle>
-              <CardDescription>Sign in to your RealAlgo account</CardDescription>
+              <CardDescription>Sign in to your OpenAlgo account</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -242,7 +236,7 @@ export default function Login() {
           {/* Welcome Content - Second on mobile */}
           <div className="flex-1 max-w-xl text-center lg:text-left order-2 lg:order-1">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-              Welcome to <span className="text-primary">RealAlgo</span>
+              Welcome to <span className="text-primary">OpenAlgo</span>
             </h1>
             <p className="text-lg lg:text-xl mb-8 text-muted-foreground">
               Sign in to your account to access your trading dashboard and manage your algorithmic
@@ -260,7 +254,7 @@ export default function Login() {
             <div className="flex justify-center lg:justify-start gap-4">
               <Button variant="outline" asChild>
                 <a
-                  href="https://github.com/marketcalls/realalgo"
+                  href="https://github.com/marketcalls/openalgo"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"
@@ -271,7 +265,7 @@ export default function Login() {
               </Button>
               <Button variant="outline" asChild>
                 <a
-                  href="https://realalgo.in/discord"
+                  href="https://openalgo.in/discord"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"

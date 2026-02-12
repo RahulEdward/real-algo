@@ -1,7 +1,7 @@
 import { ArrowLeft, Clock, FileText, HardDrive, RefreshCw, ScrollText, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { pythonStrategyApi } from '@/api/python-strategy'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -49,8 +49,7 @@ export default function PythonStrategyLogs() {
         setSelectedLog(logsData[0].name)
       }
     } catch (error) {
-      console.error('Failed to fetch data:', error)
-      toast.error('Failed to load logs')
+      showToast.error('Failed to load logs', 'pythonStrategy')
     } finally {
       setLoading(false)
     }
@@ -66,10 +65,9 @@ export default function PythonStrategyLogs() {
       const content = await pythonStrategyApi.getLogContent(strategyId, logName)
       setLogContent(content)
     } catch (error) {
-      console.error('Failed to fetch log content:', error)
       // Only show toast for manual fetch, not auto-refresh
       if (showLoading) {
-        toast.error('Failed to load log content')
+        showToast.error('Failed to load log content', 'pythonStrategy')
       }
     } finally {
       if (showLoading) {
@@ -111,16 +109,15 @@ export default function PythonStrategyLogs() {
 
       const response = await pythonStrategyApi.clearLogs(strategyId)
       if (response.status === 'success') {
-        toast.success('Logs cleared')
+        showToast.success('Logs cleared', 'pythonStrategy')
         setLogFiles([])
         setSelectedLog(null)
         setLogContent(null)
       } else {
-        toast.error(response.message || 'Failed to clear logs')
+        showToast.error(response.message || 'Failed to clear logs', 'pythonStrategy')
       }
     } catch (error) {
-      console.error('Failed to clear logs:', error)
-      toast.error('Failed to clear logs')
+      showToast.error('Failed to clear logs', 'pythonStrategy')
     } finally {
       setClearing(false)
       setClearDialogOpen(false)

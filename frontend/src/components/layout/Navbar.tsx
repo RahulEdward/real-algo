@@ -1,7 +1,7 @@
-import { BarChart3, LogOut, Menu, Moon, Sun, Zap } from 'lucide-react'
+import { BarChart3, BookOpen, LogOut, Menu, Moon, Sun, Zap } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { authApi } from '@/api/auth'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,44 +12,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { isActiveRoute, mobileSheetItems, navItems, profileMenuItems } from '@/config/navigation'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
-
-// RealAlgo Logo Component - Trading chart with "R" stylized
-function RealAlgoLogo({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      {/* Background circle */}
-      <circle cx="16" cy="16" r="15" fill="currentColor" className="text-primary" />
-      {/* Trading chart line - upward trend */}
-      <path
-        d="M6 22 L10 18 L14 20 L18 12 L22 14 L26 8"
-        stroke="white"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      {/* Arrow head for upward trend */}
-      <path
-        d="M23 8 L26 8 L26 11"
-        stroke="white"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-    </svg>
-  )
-}
 
 export function Navbar() {
   const location = useLocation()
@@ -63,7 +37,7 @@ export function Navbar() {
       await authApi.logout()
       logout()
       navigate('/login')
-      toast.success('Logged out successfully')
+      showToast.success('Logged out successfully')
     } catch {
       logout()
       navigate('/login')
@@ -74,18 +48,18 @@ export function Navbar() {
     const result = await toggleAppMode()
     if (result.success) {
       const newMode = useThemeStore.getState().appMode
-      toast.success(`Switched to ${newMode === 'live' ? 'Live' : 'Analyze'} mode`)
+      showToast.success(`Switched to ${newMode === 'live' ? 'Live' : 'Analyze'} mode`)
 
       // Show warning toast when enabling analyzer mode (like old UI)
       if (newMode === 'analyzer') {
         setTimeout(() => {
-          toast.warning('⚠️ Analyzer (Sandbox) mode is for testing purposes only', {
+          showToast.warning('Analyzer (Sandbox) mode is for testing purposes only', undefined, {
             duration: 10000,
           })
         }, 2000)
       }
     } else {
-      toast.error(result.message || 'Failed to toggle mode')
+      showToast.error(result.message || 'Failed to toggle mode')
     }
   }
 
@@ -102,18 +76,27 @@ export function Navbar() {
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72">
+          <SheetContent side="left" className="w-72 overflow-y-auto">
+            {/* Visually hidden but accessible for screen readers */}
+            <SheetHeader className="sr-only">
+              <SheetTitle>Navigation Menu</SheetTitle>
+              <SheetDescription>Main navigation and quick access links</SheetDescription>
+            </SheetHeader>
             <div className="flex flex-col gap-4 py-4">
               <Link
                 to="/dashboard"
                 className="flex items-center gap-2 px-2"
                 onClick={() => setMobileOpen(false)}
               >
-                <RealAlgoLogo className="h-8 w-8" />
-                <span className="font-semibold">RealAlgo</span>
+                <img src="/logo.png" alt="OpenAlgo" className="h-8 w-8" />
+                <span className="font-semibold">OpenAlgo</span>
               </Link>
+
+              {/* Secondary nav items (not in bottom nav) */}
               <nav className="flex flex-col gap-1">
-                {/* Show secondary items not in bottom nav */}
+                <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Navigation
+                </div>
                 {mobileSheetItems.map((item) => (
                   <Link
                     key={item.href}
@@ -131,14 +114,47 @@ export function Navbar() {
                   </Link>
                 ))}
               </nav>
+
+              {/* Profile menu items for mobile access */}
+              <nav className="flex flex-col gap-1 border-t pt-4">
+                <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Quick Access
+                </div>
+                {profileMenuItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors min-h-[44px] touch-manipulation',
+                      isActive(item.href)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-muted active:bg-muted'
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                ))}
+                <a
+                  href="https://docs.openalgo.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors min-h-[44px] touch-manipulation hover:bg-muted active:bg-muted"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Docs
+                </a>
+              </nav>
             </div>
           </SheetContent>
         </Sheet>
 
         {/* Logo */}
         <Link to="/dashboard" className="flex items-center gap-2 mr-6">
-          <RealAlgoLogo className="h-8 w-8" />
-          <span className="hidden font-semibold sm:inline-block">RealAlgo</span>
+          <img src="/logo.png" alt="OpenAlgo" className="h-8 w-8" />
+          <span className="hidden font-semibold sm:inline-block">OpenAlgo</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -224,7 +240,7 @@ export function Navbar() {
                 aria-label="Open user menu"
               >
                 <span className="text-sm font-medium">
-                  {user?.username?.[0]?.toUpperCase() || 'R'}
+                  {user?.username?.[0]?.toUpperCase() || 'O'}
                 </span>
               </Button>
             </DropdownMenuTrigger>
@@ -239,6 +255,17 @@ export function Navbar() {
                   {item.label}
                 </DropdownMenuItem>
               ))}
+              <DropdownMenuItem asChild>
+                <a
+                  href="https://docs.openalgo.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Docs
+                </a>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}

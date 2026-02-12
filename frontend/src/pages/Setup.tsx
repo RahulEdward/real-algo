@@ -1,7 +1,7 @@
 import { Check, Info, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -116,7 +116,7 @@ export default function Setup() {
 
       // If setup was successful (response ok or redirected), go to login
       if (response.ok || response.redirected) {
-        toast.success('Account created successfully')
+        showToast.success('Account created successfully')
         // Clear any existing session by calling logout
         try {
           await fetch('/auth/logout', {
@@ -131,7 +131,6 @@ export default function Setup() {
         setError('Setup failed. Please try again.')
       }
     } catch (err) {
-      console.error('Setup error:', err)
       setError('Setup failed. Please check your connection and try again.')
     } finally {
       setIsLoading(false)
@@ -161,7 +160,7 @@ export default function Setup() {
                 Initial <span className="text-primary">Setup</span>
               </h1>
               <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed">
-                Welcome to RealAlgo! Create your administrator account to get started with
+                Welcome to OpenAlgo! Create your administrator account to get started with
                 algorithmic trading. This account will have full access to manage the platform.
               </p>
             </div>

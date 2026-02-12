@@ -215,7 +215,7 @@ export default function BrokerSelect() {
           <Card className="w-full max-w-md shadow-xl order-1 lg:order-2">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
-                <img src="/logo.png" alt="RealAlgo" className="h-20 w-20" />
+                <img src="/logo.png" alt="OpenAlgo" className="h-20 w-20" />
               </div>
               <CardTitle className="text-2xl">Connect Your Trading Account</CardTitle>
               <CardDescription>
@@ -243,14 +243,13 @@ export default function BrokerSelect() {
                       <SelectValue placeholder="Select a Broker" />
                     </SelectTrigger>
                     <SelectContent>
-                      {allBrokers.map((broker) => {
-                        const isEnabled = broker.id === brokerConfig?.broker_name
-                        return (
-                          <SelectItem key={broker.id} value={broker.id} disabled={!isEnabled}>
-                            {broker.name} {!isEnabled && '(Disabled)'}
+                      {allBrokers
+                        .filter((broker) => broker.id === brokerConfig?.broker_name)
+                        .map((broker) => (
+                          <SelectItem key={broker.id} value={broker.id}>
+                            {broker.name}
                           </SelectItem>
-                        )
-                      })}
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -278,7 +277,7 @@ export default function BrokerSelect() {
               Connect Your <span className="text-primary">Broker</span>
             </h1>
             <p className="text-lg lg:text-xl mb-8 text-muted-foreground">
-              Link your trading account to start executing trades through RealAlgo's algorithmic
+              Link your trading account to start executing trades through OpenAlgo's algorithmic
               trading platform.
             </p>
 
@@ -290,7 +289,7 @@ export default function BrokerSelect() {
 
             <div className="flex justify-center lg:justify-start gap-4">
               <Button variant="outline" asChild>
-                <a href="https://docs.realalgo.in" target="_blank" rel="noopener noreferrer">
+                <a href="https://docs.openalgo.in" target="_blank" rel="noopener noreferrer">
                   <BookOpen className="mr-2 h-4 w-4" />
                   Documentation
                 </a>

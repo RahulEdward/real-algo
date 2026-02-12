@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { showToast } from "@/utils/toast";
 import { authApi } from "@/api/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -183,7 +183,7 @@ export default function Playground() {
       await authApi.logout();
       logout();
       navigate("/login");
-      toast.success("Logged out successfully");
+      showToast.success("Logged out successfully", 'analyzer');
     } catch {
       logout();
       navigate("/login");
@@ -254,7 +254,7 @@ export default function Playground() {
         setEndpoints(data);
       }
     } catch {
-      toast.error("Failed to load endpoints");
+      showToast.error("Failed to load endpoints", 'analyzer');
     }
   };
 
@@ -388,22 +388,22 @@ export default function Playground() {
       const parsed = JSON.parse(requestBody);
       const prettified = JSON.stringify(parsed, null, 2);
       updateCurrentTabBody(prettified);
-      toast.success("JSON prettified");
+      showToast.success("JSON prettified", 'analyzer');
     } catch {
-      toast.error("Invalid JSON - cannot prettify");
+      showToast.error("Invalid JSON - cannot prettify", 'analyzer');
     }
   };
 
   const sendRequest = async () => {
     if (!url) {
-      toast.warning("Please select an endpoint");
+      showToast.warning("Please select an endpoint", 'analyzer');
       return;
     }
 
 
     const validation = isValidApiUrl(url, method);
     if (!validation.valid) {
-      toast.error(validation.error);
+      showToast.error(validation.error || 'Validation error', 'analyzer');
       return;
     }
 
@@ -439,7 +439,7 @@ export default function Playground() {
             });
             fetchUrl = urlObj.toString();
           } catch {
-            toast.error("Invalid JSON for query parameters");
+            showToast.error("Invalid JSON for query parameters", 'analyzer');
             setIsLoading(false);
             return;
           }
@@ -496,14 +496,14 @@ export default function Playground() {
   const copyResponse = () => {
     if (responseData) {
       navigator.clipboard.writeText(responseData);
-      toast.success("Response copied!");
+      showToast.success("Response copied!", 'clipboard');
     }
   };
 
   const copyApiKey = () => {
     if (apiKey) {
       navigator.clipboard.writeText(apiKey);
-      toast.success("API key copied!");
+      showToast.success("API key copied!", 'clipboard');
     }
   };
 
@@ -511,22 +511,22 @@ export default function Playground() {
     const result = await toggleAppMode();
     if (result.success) {
       const newMode = useThemeStore.getState().appMode;
-      toast.success(
+      showToast.success(
         `Switched to ${newMode === "live" ? "Live" : "Analyze"} mode`,
+        'analyzer'
       );
 
       if (newMode === "analyzer") {
         setTimeout(() => {
-          toast.warning(
-            "⚠️ Analyzer (Sandbox) mode is for testing purposes only",
-            {
-              duration: 10000,
-            },
+          showToast.warning(
+            "Analyzer (Sandbox) mode is for testing purposes only",
+            'analyzer',
+            { duration: 10000 },
           );
         }, 2000);
       }
     } else {
-      toast.error(result.message || "Failed to toggle mode");
+      showToast.error(result.message || "Failed to toggle mode", 'analyzer');
     }
   };
 
@@ -546,7 +546,7 @@ export default function Playground() {
         });
         curlUrl = urlObj.toString();
       } catch {
-        toast.error("Invalid JSON for query parameters");
+        showToast.error("Invalid JSON for query parameters", 'analyzer');
         return;
       }
     }
@@ -561,7 +561,7 @@ export default function Playground() {
     }
 
     navigator.clipboard.writeText(curl);
-    toast.success("Copied as cURL");
+    showToast.success("Copied as cURL", 'clipboard');
   };
 
   // Filter endpoints by search
@@ -621,10 +621,10 @@ export default function Playground() {
           <div className="flex items-center gap-2 px-2">
             <img
               src="/images/android-chrome-192x192.png"
-              alt="RealAlgo"
+              alt="OpenAlgo"
               className="w-6 h-6"
             />
-            <span className="font-semibold text-sm">realalgo</span>
+            <span className="font-semibold text-sm">openalgo</span>
           </div>
         </div>
 
@@ -795,7 +795,7 @@ export default function Playground() {
               ))}
               <DropdownMenuItem asChild>
                 <a
-                  href="https://docs.realalgo.in"
+                  href="https://docs.openalgo.in"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"
@@ -1217,7 +1217,7 @@ export default function Playground() {
             <div className="flex-1 flex flex-col items-center justify-center text-center bg-background">
               <img
                 src="/images/android-chrome-192x192.png"
-                alt="RealAlgo"
+                alt="OpenAlgo"
                 className="w-16 h-16 mb-4"
               />
               <h2 className="text-lg font-semibold text-foreground/80 mb-2">

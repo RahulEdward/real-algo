@@ -1,7 +1,7 @@
 import { ArrowLeft, Check, Eye, EyeOff, Key, Save, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { webClient } from '@/api/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,8 +43,7 @@ export default function TelegramConfig() {
       setBroadcastEnabled(configData.broadcast_enabled)
       setRateLimit(configData.rate_limit_per_minute)
     } catch (error) {
-      console.error('Error fetching config:', error)
-      toast.error('Failed to load configuration')
+      showToast.error('Failed to load configuration', 'telegram')
     } finally {
       setIsLoading(false)
     }
@@ -72,15 +71,15 @@ export default function TelegramConfig() {
       )
 
       if (response.data.status === 'success') {
-        toast.success('Configuration saved successfully')
+        showToast.success('Configuration saved successfully', 'telegram')
         setToken('') // Clear token field after saving
         fetchConfig() // Refresh config
       } else {
-        toast.error(response.data.message || 'Failed to save configuration')
+        showToast.error(response.data.message || 'Failed to save configuration', 'telegram')
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
-      toast.error(err.response?.data?.message || 'Failed to save configuration')
+      showToast.error(err.response?.data?.message || 'Failed to save configuration', 'telegram')
     } finally {
       setIsSaving(false)
     }
@@ -198,7 +197,7 @@ export default function TelegramConfig() {
       {/* Save Button and Documentation */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
         <a
-          href="https://docs.realalgo.in/trading-platform/telegram"
+          href="https://docs.openalgo.in/trading-platform/telegram"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -230,7 +229,7 @@ export default function TelegramConfig() {
             <p className="text-sm">
               <span className="font-semibold">Need detailed instructions?</span> Visit our complete{' '}
               <a
-                href="https://docs.realalgo.in/trading-platform/telegram"
+                href="https://docs.openalgo.in/trading-platform/telegram"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline font-semibold"

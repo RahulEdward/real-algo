@@ -90,7 +90,6 @@ export default function Dashboard() {
         setError(data.message || 'Failed to fetch margin data')
       }
     } catch (err) {
-      console.error('Error fetching funds:', err)
       setError('Failed to fetch margin data')
     } finally {
       setIsLoading(false)
@@ -194,7 +193,7 @@ export default function Dashboard() {
   const quickAccessCards = [
     {
       href: '/search',
-      label: 'RealAlgo Symbols',
+      label: 'OpenAlgo Symbols',
       description: 'Universal symbology across brokers',
       icon: Search,
       gradient: 'from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10',
@@ -214,7 +213,7 @@ export default function Dashboard() {
       borderColor: 'border-violet-500/20 hover:border-violet-500/40',
     },
     {
-      href: 'https://docs.realalgo.in',
+      href: 'https://docs.openalgo.in',
       label: 'Documentation',
       description: 'Tutorials, API docs & features',
       icon: BookOpen,
@@ -245,7 +244,7 @@ export default function Dashboard() {
       borderColor: 'border-blue-500/20 hover:border-blue-500/40',
     },
     {
-      href: '/latency',
+      href: '/logs/latency',
       label: 'Latency Monitor',
       description: 'Monitor order & API latency',
       icon: Zap,

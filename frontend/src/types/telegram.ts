@@ -19,7 +19,7 @@ export interface TelegramUser {
   id: number
   telegram_id: number
   telegram_username: string | null
-  realalgo_username: string | null
+  openalgo_username: string | null
   first_name: string | null
   last_name: string | null
   notifications_enabled: boolean

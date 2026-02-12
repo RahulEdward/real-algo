@@ -1,28 +1,27 @@
 import { ArrowLeft, Clock, FileCode, Info, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { pythonStrategyApi } from '@/api/python-strategy'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SCHEDULE_DAYS } from '@/types/python-strategy'
 
 const EXAMPLE_STRATEGY = `"""
-Example RealAlgo Strategy
-This is a minimal example showing how to use the RealAlgo Python SDK.
+Example OpenAlgo Strategy
+This is a minimal example showing how to use the OpenAlgo Python SDK.
 """
 
 import os
 import time
-from realalgo import api
+from openalgo import api
 
 # Get API key from environment variable
-API_KEY = os.getenv('REALALGO_API_KEY')
+API_KEY = os.getenv('OPENALGO_API_KEY')
 
 # Initialize the API client
 client = api(
@@ -107,13 +106,13 @@ export default function NewPythonStrategy() {
     if (selectedFile) {
       // Validate file extension
       if (!selectedFile.name.endsWith('.py')) {
-        toast.error('Please select a Python file (.py)')
+        showToast.error('Please select a Python file (.py)', 'pythonStrategy')
         return
       }
       // Validate file size (max 1MB for Python scripts)
       const maxSizeBytes = 1024 * 1024 // 1MB
       if (selectedFile.size > maxSizeBytes) {
-        toast.error('File size must be less than 1MB')
+        showToast.error('File size must be less than 1MB', 'pythonStrategy')
         return
       }
       setFile(selectedFile)
@@ -129,7 +128,7 @@ export default function NewPythonStrategy() {
     e.preventDefault()
 
     if (!validateForm()) {
-      toast.error('Please fix the form errors')
+      showToast.error('Please fix the form errors', 'pythonStrategy')
       return
     }
 
@@ -143,15 +142,14 @@ export default function NewPythonStrategy() {
       })
 
       if (response.status === 'success') {
-        toast.success('Strategy uploaded with schedule')
+        showToast.success('Strategy uploaded with schedule', 'pythonStrategy')
         navigate('/python')
       } else {
-        toast.error(response.message || 'Failed to upload strategy')
+        showToast.error(response.message || 'Failed to upload strategy', 'pythonStrategy')
       }
     } catch (error: unknown) {
-      console.error('Failed to upload strategy:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload strategy'
-      toast.error(errorMessage)
+      showToast.error(errorMessage, 'pythonStrategy')
     } finally {
       setLoading(false)
     }
@@ -179,8 +177,8 @@ export default function NewPythonStrategy() {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Your Python script should use the <code className="bg-muted px-1 rounded">realalgo</code>{' '}
-          SDK. Install it with: <code className="bg-muted px-1 rounded">pip install realalgo</code>
+          Your Python script should use the <code className="bg-muted px-1 rounded">openalgo</code>{' '}
+          SDK. Install it with: <code className="bg-muted px-1 rounded">pip install openalgo</code>
         </AlertDescription>
       </Alert>
 
@@ -290,7 +288,8 @@ export default function NewPythonStrategy() {
                 <Label>Schedule Days</Label>
                 <div className="flex flex-wrap gap-2">
                   {SCHEDULE_DAYS.map((day) => (
-                    <div
+                    <button
+                      type="button"
                       key={day.value}
                       className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer transition-colors ${
                         selectedDays.includes(day.value)
@@ -299,13 +298,19 @@ export default function NewPythonStrategy() {
                       }`}
                       onClick={() => handleDayToggle(day.value)}
                     >
-                      <Checkbox
-                        checked={selectedDays.includes(day.value)}
-                        onCheckedChange={() => handleDayToggle(day.value)}
-                        className="pointer-events-none"
-                      />
+                      <div className={`h-4 w-4 rounded border flex items-center justify-center ${
+                        selectedDays.includes(day.value)
+                          ? 'bg-primary-foreground border-primary-foreground'
+                          : 'border-current'
+                      }`}>
+                        {selectedDays.includes(day.value) && (
+                          <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
                       <span className="text-sm">{day.label}</span>
-                    </div>
+                    </button>
                   ))}
                 </div>
                 {errors.days && <p className="text-sm text-red-500">{errors.days}</p>}
@@ -358,7 +363,7 @@ export default function NewPythonStrategy() {
                 className="mt-4"
                 onClick={() => {
                   navigator.clipboard.writeText(EXAMPLE_STRATEGY)
-                  toast.success('Copied to clipboard')
+                  showToast.success('Copied to clipboard', 'clipboard')
                 }}
               >
                 Copy Template

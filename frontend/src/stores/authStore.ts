@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthStore>()(
       },
     }),
     {
-      name: 'realalgo-auth',
+      name: 'openalgo-auth',
     }
   )
 )

@@ -1,11 +1,10 @@
 import { ArrowLeft, Calendar, Clock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { pythonStrategyApi } from '@/api/python-strategy'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -34,8 +33,7 @@ export default function SchedulePythonStrategy() {
         if (data.schedule_stop_time) setStopTime(data.schedule_stop_time)
         if (data.schedule_days?.length) setSelectedDays(data.schedule_days)
       } catch (error) {
-        console.error('Failed to fetch strategy:', error)
-        toast.error('Failed to load strategy')
+        showToast.error('Failed to load strategy', 'pythonStrategy')
         navigate('/python')
       } finally {
         setLoading(false)
@@ -56,15 +54,15 @@ export default function SchedulePythonStrategy() {
 
     if (!strategyId) return
     if (selectedDays.length === 0) {
-      toast.error('Please select at least one day')
+      showToast.error('Please select at least one day', 'pythonStrategy')
       return
     }
     if (!startTime) {
-      toast.error('Start time is required')
+      showToast.error('Start time is required', 'pythonStrategy')
       return
     }
     if (!stopTime) {
-      toast.error('Stop time is required')
+      showToast.error('Stop time is required', 'pythonStrategy')
       return
     }
 
@@ -77,14 +75,13 @@ export default function SchedulePythonStrategy() {
       })
 
       if (response.status === 'success') {
-        toast.success('Schedule saved successfully')
+        showToast.success('Schedule saved successfully', 'pythonStrategy')
         navigate('/python')
       } else {
-        toast.error(response.message || 'Failed to save schedule')
+        showToast.error(response.message || 'Failed to save schedule', 'pythonStrategy')
       }
     } catch (error) {
-      console.error('Failed to schedule:', error)
-      toast.error('Failed to save schedule')
+      showToast.error('Failed to save schedule', 'pythonStrategy')
     } finally {
       setSaving(false)
     }
@@ -188,21 +185,29 @@ export default function SchedulePythonStrategy() {
               <Label>Days to Run</Label>
               <div className="flex flex-wrap gap-2">
                 {SCHEDULE_DAYS.map((day) => (
-                  <label
+                  <button
+                    type="button"
                     key={day.value}
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
                       selectedDays.includes(day.value)
                         ? 'bg-primary text-primary-foreground border-primary'
                         : 'bg-background hover:bg-muted'
                     }`}
+                    onClick={() => handleDayToggle(day.value)}
                   >
-                    <Checkbox
-                      checked={selectedDays.includes(day.value)}
-                      onCheckedChange={() => handleDayToggle(day.value)}
-                      className="hidden"
-                    />
+                    <div className={`h-4 w-4 rounded border flex items-center justify-center ${
+                      selectedDays.includes(day.value)
+                        ? 'bg-primary-foreground border-primary-foreground'
+                        : 'border-current'
+                    }`}>
+                      {selectedDays.includes(day.value) && (
+                        <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </div>
                     <span className="text-sm font-medium">{day.label}</span>
-                  </label>
+                  </button>
                 ))}
               </div>
             </div>

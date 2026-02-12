@@ -1,7 +1,7 @@
 import { AlertTriangle, ArrowLeft, ExternalLink, Loader2, Shield } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { fetchCSRFToken } from '@/api/client'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -372,7 +372,7 @@ export default function BrokerTOTP() {
 
       if (data.status === 'success' || response.ok) {
         login(formData.userid || formData.mobile || '', broker || '')
-        toast.success('Authentication successful')
+        showToast.success('Authentication successful')
         navigate('/dashboard')
       } else {
         setError(data.message || 'Authentication failed. Please try again.')
@@ -504,7 +504,7 @@ export default function BrokerTOTP() {
                   Back to Broker Selection
                 </Link>
                 <a
-                  href="https://docs.realalgo.in"
+                  href="https://docs.openalgo.in"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline inline-flex items-center gap-1"

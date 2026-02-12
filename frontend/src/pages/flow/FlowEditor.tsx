@@ -4,7 +4,7 @@
 import { useCallback, useRef, useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -111,7 +111,7 @@ function FlowEditorContent() {
       logout()
       navigate('/login')
     } catch (error) {
-      toast.error('Logout failed')
+      showToast.error('Logout failed', 'system')
     }
   }
 
@@ -173,10 +173,10 @@ function FlowEditorContent() {
     onSuccess: () => {
       markSaved()
       queryClient.invalidateQueries({ queryKey: flowQueryKeys.workflows() })
-      toast.success('Workflow saved')
+      showToast.success('Workflow saved', 'flow')
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      showToast.error(error.message, 'flow')
     },
   })
 
@@ -185,10 +185,10 @@ function FlowEditorContent() {
     onSuccess: () => {
       setIsActive(true)
       queryClient.invalidateQueries({ queryKey: flowQueryKeys.workflow(Number(id)) })
-      toast.success('Workflow activated')
+      showToast.success('Workflow activated', 'flow')
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      showToast.error(error.message, 'flow')
     },
   })
 
@@ -197,10 +197,10 @@ function FlowEditorContent() {
     onSuccess: () => {
       setIsActive(false)
       queryClient.invalidateQueries({ queryKey: flowQueryKeys.workflow(Number(id)) })
-      toast.success('Workflow deactivated')
+      showToast.success('Workflow deactivated', 'flow')
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      showToast.error(error.message, 'flow')
     },
   })
 
@@ -217,15 +217,15 @@ function FlowEditorContent() {
         setExecutionLogs(data.logs as LogEntry[])
       }
       if (data.status === 'success') {
-        toast.success(data.message || 'Execution completed')
+        showToast.success(data.message || 'Execution completed', 'flow')
       } else {
-        toast.error(data.message || 'Execution failed')
+        showToast.error(data.message || 'Execution failed', 'flow')
       }
     },
     onError: (error: Error) => {
       setExecutionStatus('error')
       setExecutionLogs([{ time: new Date().toISOString(), message: error.message, level: 'error' }])
-      toast.error(error.message)
+      showToast.error(error.message, 'flow')
     },
   })
 
@@ -338,9 +338,9 @@ function FlowEditorContent() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Workflow exported')
+      showToast.success('Workflow exported', 'flow')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Export failed')
+      showToast.error(error instanceof Error ? error.message : 'Export failed', 'flow')
     }
   }, [id])
 
@@ -350,8 +350,8 @@ function FlowEditorContent() {
       <div className="flex h-screen flex-col bg-background text-foreground">
         <div className="h-12 border-b border-border flex items-center px-2 bg-card/50">
           <div className="flex items-center gap-2 px-2">
-            <img src="/images/android-chrome-192x192.png" alt="RealAlgo" className="w-6 h-6" />
-            <span className="font-semibold text-sm">realalgo</span>
+            <img src="/images/android-chrome-192x192.png" alt="OpenAlgo" className="w-6 h-6" />
+            <span className="font-semibold text-sm">openalgo</span>
           </div>
           <div className="flex-1" />
         </div>
@@ -372,8 +372,8 @@ function FlowEditorContent() {
         {/* Top Header Bar */}
         <div className="h-12 border-b border-border flex items-center px-2 bg-card/50">
           <div className="flex items-center gap-2 px-2">
-            <img src="/images/android-chrome-192x192.png" alt="RealAlgo" className="w-6 h-6" />
-            <span className="font-semibold text-sm">realalgo</span>
+            <img src="/images/android-chrome-192x192.png" alt="OpenAlgo" className="w-6 h-6" />
+            <span className="font-semibold text-sm">openalgo</span>
           </div>
           <div className="flex-1" />
         </div>
@@ -390,8 +390,8 @@ function FlowEditorContent() {
       <div className="h-12 border-b border-border flex items-center px-2 bg-card/50">
         {/* Left: Logo */}
         <div className="flex items-center gap-2 px-2">
-          <img src="/images/android-chrome-192x192.png" alt="RealAlgo" className="w-6 h-6" />
-          <span className="font-semibold text-sm">realalgo</span>
+          <img src="/images/android-chrome-192x192.png" alt="OpenAlgo" className="w-6 h-6" />
+          <span className="font-semibold text-sm">openalgo</span>
         </div>
 
         {/* Center: Workflow Name */}
@@ -478,7 +478,7 @@ function FlowEditorContent() {
               ))}
               <DropdownMenuItem asChild>
                 <a
-                  href="https://docs.realalgo.in"
+                  href="https://docs.openalgo.in"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"
@@ -620,6 +620,8 @@ function FlowEditorContent() {
               animated: true,
             }}
             connectionLineStyle={{ stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
+            connectionRadius={30}
+            connectOnClick={true}
           >
             <Background gap={16} size={1} />
             <Controls />

@@ -1,6 +1,6 @@
 import { AlertTriangle, BookOpen, Copy, ExternalLink, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { showToast } from '@/utils/toast'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -69,7 +69,6 @@ export default function TradingView() {
         const data = await response.json()
         setHostConfig(data)
       } catch (error) {
-        console.error('Failed to fetch host config:', error)
         // Fallback to window.location.origin if config fetch fails
         setHostConfig({
           host_server: window.location.origin,
@@ -104,7 +103,6 @@ export default function TradingView() {
         setSearchResults((data.results || []).slice(0, 10))
         setShowResults(true)
       } catch (error) {
-        console.error('Search error:', error)
         setSearchResults([])
       } finally {
         setIsLoading(false)
@@ -143,7 +141,7 @@ export default function TradingView() {
   const generateJson = (showError = true) => {
     if (!symbol || !exchange) {
       if (showError) {
-        toast.error('Please select a symbol and exchange')
+        showToast.error('Please select a symbol and exchange', 'clipboard')
       }
       return
     }
@@ -188,9 +186,9 @@ export default function TradingView() {
   const copyToClipboard = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success(`${label} copied to clipboard`)
+      showToast.success(`${label} copied to clipboard`, 'clipboard')
     } catch {
-      toast.error('Copy failed - please copy manually')
+      showToast.error('Copy failed - please copy manually', 'clipboard')
     }
   }
 
@@ -212,7 +210,7 @@ export default function TradingView() {
             <strong>Webhook URL not accessible!</strong> TradingView cannot send alerts to
             localhost. Use <strong>ngrok</strong>, <strong>Cloudflare Tunnel</strong>,{' '}
             <strong>VS Code Dev Tunnel</strong>, or a <strong>custom domain</strong> to expose your
-            RealAlgo instance to the internet. Update <code>HOST_SERVER</code> in your <code>.env</code> file with your external URL.
+            OpenAlgo instance to the internet. Update <code>HOST_SERVER</code> in your <code>.env</code> file with your external URL.
           </AlertDescription>
         </Alert>
       )}
@@ -422,7 +420,7 @@ export default function TradingView() {
               </p>
               <Button asChild variant="default">
                 <a
-                  href="https://docs.realalgo.in/trading-platform/tradingview"
+                  href="https://docs.openalgo.in/trading-platform/tradingview"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
