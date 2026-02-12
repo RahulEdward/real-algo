@@ -22,15 +22,15 @@ logger = get_logger(__name__)
 # Configuration matches Flask-SocketIO settings:
 # - cors_allowed_origins="*" - Allow all origins (same as Flask)
 # - async_mode="asgi" - Use ASGI mode for FastAPI compatibility
-# - ping_timeout=10 - Time in seconds before considering connection lost
-# - ping_interval=5 - Interval in seconds between pings
+# - ping_timeout=60 - Time in seconds before considering connection lost (increased for stability)
+# - ping_interval=25 - Interval in seconds between pings (increased for stability)
 # - logger=False - Disable built-in logging to avoid noise
 # - engineio_logger=False - Disable engine.io logging
 sio = socketio.AsyncServer(
     async_mode="asgi",
     cors_allowed_origins="*",
-    ping_timeout=10,
-    ping_interval=5,
+    ping_timeout=60,
+    ping_interval=25,
     logger=False,
     engineio_logger=False,
 )

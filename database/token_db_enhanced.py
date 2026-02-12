@@ -940,7 +940,11 @@ def get_distinct_expiries_cached(
     """
     Get distinct expiry dates from cache - fast in-memory lookup
     Falls back to database if cache is not available
+    
+    Matches underlying by extracting it from symbol (e.g., NIFTY24FEB26FUT -> NIFTY)
     """
+    import re
+    
     cache = get_cache()
 
     if cache.cache_loaded and cache.is_cache_valid():
@@ -948,17 +952,30 @@ def get_distinct_expiries_cached(
 
         expiries = set()
         underlying_upper = underlying.strip().upper() if underlying else None
+        
+        # Pattern to extract underlying from symbol
+        underlying_pattern = re.compile(r'^([A-Z&\-]+?)(?:\d{2}[A-Z]{3}\d{2}|\d{2}[A-Z]{3}\d{4})', re.IGNORECASE)
+        
+        # FNO instrument types
+        fno_types = {"FUT", "CE", "PE", "FUTIDX", "OPTIDX", "FUTSTK", "OPTSTK"}
 
         for symbol_data in cache.symbols.values():
             # Filter by exchange
             if exchange and symbol_data.exchange != exchange:
                 continue
-
-            # Filter by underlying
-            if underlying_upper and (
-                not symbol_data.name or symbol_data.name.upper() != underlying_upper
-            ):
+            
+            # Only process FNO instruments
+            if symbol_data.instrumenttype not in fno_types:
                 continue
+
+            # Filter by underlying (extract from symbol)
+            if underlying_upper and symbol_data.symbol:
+                match = underlying_pattern.match(symbol_data.symbol)
+                if not match:
+                    continue
+                extracted_underlying = match.group(1).upper()
+                if extracted_underlying != underlying_upper:
+                    continue
 
             # Collect non-empty expiries
             if symbol_data.expiry:
@@ -990,20 +1007,40 @@ def get_distinct_underlyings_cached(exchange: str | None = None) -> list[str]:
     """
     Get distinct underlying names from cache - fast in-memory lookup
     Falls back to database if cache is not available
+    
+    Extracts underlying names from symbols by removing date/expiry/strike/type suffixes.
+    For example: NIFTY24FEB26FUT -> NIFTY, BANKNIFTY26FEB2450000CE -> BANKNIFTY
     """
+    import re
+    
     cache = get_cache()
 
     if cache.cache_loaded and cache.is_cache_valid():
         underlyings = set()
+        
+        # Pattern to extract underlying from symbol
+        # Examples: NIFTY24FEB26FUT, BANKNIFTY26FEB2450000CE, RELIANCE24FEB261500PE
+        underlying_pattern = re.compile(r'^([A-Z&\-]+?)(?:\d{2}[A-Z]{3}\d{2}|\d{2}[A-Z]{3}\d{4})', re.IGNORECASE)
+        
+        # FNO instrument types
+        fno_types = {"FUT", "CE", "PE", "FUTIDX", "OPTIDX", "FUTSTK", "OPTSTK"}
 
         for symbol_data in cache.symbols.values():
             # Filter by exchange
             if exchange and symbol_data.exchange != exchange:
                 continue
+            
+            # Only process FNO instruments
+            if symbol_data.instrumenttype not in fno_types:
+                continue
 
-            # Collect non-empty names
-            if symbol_data.name:
-                underlyings.add(symbol_data.name)
+            # Extract underlying from symbol
+            if symbol_data.symbol:
+                match = underlying_pattern.match(symbol_data.symbol)
+                if match:
+                    underlying = match.group(1).upper()
+                    if len(underlying) >= 2:
+                        underlyings.add(underlying)
 
         return sorted(list(underlyings))
 

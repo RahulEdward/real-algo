@@ -238,7 +238,23 @@ def get_csrf_config() -> dict:
     # /socket.io/ is exempt because Socket.IO uses its own authentication mechanism
     # /historify/api/ is exempt because it's internal API with session auth
     # /auth/ is exempt because auth endpoints handle their own validation
-    exempt_paths = ["/api/v1/", "/setup", "/auth/", "/socket.io/", "/historify/api/"]
+    # Tools APIs are exempt because they use @cross_origin() like Flask blueprints
+    exempt_paths = [
+        "/api/v1/", 
+        "/setup", 
+        "/auth/", 
+        "/socket.io/", 
+        "/historify/api/",
+        # Tools APIs - these use session auth but are CORS-enabled like Flask
+        "/gex/api/",
+        "/ivchart/api/",
+        "/ivsmile/api/",
+        "/oiprofile/api/",
+        "/oitracker/api/",
+        "/straddle/api/",
+        "/volsurface/api/",
+        "/health/api/",
+    ]
     
     # Add webhook paths if configured (webhooks use their own auth)
     webhook_paths = os.getenv("CSRF_EXEMPT_WEBHOOK_PATHS", "")

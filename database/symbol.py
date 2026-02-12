@@ -313,6 +313,9 @@ def get_distinct_expiries(exchange: str = None, underlying: str = None) -> list[
 def get_distinct_underlyings(exchange: str = None) -> list[str]:
     """
     Get distinct underlying names for FNO symbols.
+    
+    Extracts underlying names from symbols by removing date/expiry/strike/type suffixes.
+    For example: NIFTY24FEB26FUT -> NIFTY, BANKNIFTY26FEB2450000CE -> BANKNIFTY
 
     Args:
         exchange (str, optional): Exchange to filter by (NFO, BFO, MCX, CDS)
@@ -321,20 +324,42 @@ def get_distinct_underlyings(exchange: str = None) -> list[str]:
         List[str]: List of distinct underlying names sorted alphabetically
     """
     try:
+        import re
         from sqlalchemy import distinct
 
-        query = db_session.query(distinct(SymToken.name))
+        query = db_session.query(distinct(SymToken.symbol))
 
         if exchange:
             query = query.filter(SymToken.exchange == exchange)
 
-        # Only get non-null names
-        query = query.filter(SymToken.name.isnot(None))
-        query = query.filter(SymToken.name != "")
+        # Only get non-null symbols
+        query = query.filter(SymToken.symbol.isnot(None))
+        query = query.filter(SymToken.symbol != "")
+        
+        # Filter to FNO instrument types only
+        query = query.filter(SymToken.instrumenttype.in_(["FUT", "CE", "PE", "FUTIDX", "OPTIDX", "FUTSTK", "OPTSTK"]))
 
         results = query.all()
-        underlyings = sorted([r[0] for r in results if r[0]])
-        return underlyings
+        
+        # Extract underlying from symbol by removing date/expiry/strike/type patterns
+        # Pattern: UNDERLYING + DATE(DDMMMYY or YYMMMDD) + optional STRIKE + TYPE(FUT/CE/PE)
+        # Examples: NIFTY24FEB26FUT, BANKNIFTY26FEB2450000CE, RELIANCE24FEB261500PE
+        underlying_pattern = re.compile(r'^([A-Z&\-]+?)(?:\d{2}[A-Z]{3}\d{2}|\d{2}[A-Z]{3}\d{4})', re.IGNORECASE)
+        
+        underlyings = set()
+        for r in results:
+            symbol = r[0]
+            if not symbol:
+                continue
+            
+            match = underlying_pattern.match(symbol)
+            if match:
+                underlying = match.group(1).upper()
+                # Skip if underlying is too short (likely parsing error)
+                if len(underlying) >= 2:
+                    underlyings.add(underlying)
+        
+        return sorted(underlyings)
 
     except Exception as e:
         logger.error(f"Error fetching distinct underlyings: {str(e)}")
