@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 
 from database.auth_db import get_api_key_for_tradingview, get_auth_token
 from database.health_db import HealthAlert, HealthMetric, health_session
+from dependencies_fastapi import check_session_validity
 from limiter_fastapi import limiter, API_RATE_LIMIT
 from services.gex_service import get_gex_data
 from services.intervals_service import get_intervals
@@ -30,18 +31,12 @@ from services.straddle_chart_service import get_straddle_chart_data
 from services.vol_surface_service import get_vol_surface_data
 from utils.health_monitor import check_db_connectivity, get_cached_health_status
 from utils.logging import get_logger
-from utils.session_compat import session as thread_session
 
 logger = get_logger(__name__)
 
 tools_router = APIRouter(prefix="", tags=["tools"])
 
 ALLOWED_OI_INTERVALS = {"1m", "5m", "15m"}
-
-
-def get_session_data(request: Request) -> dict:
-    """Get session data from request."""
-    return dict(request.session) if hasattr(request, "session") else {}
 
 
 # ============================================================================
@@ -155,10 +150,9 @@ def format_ist_time(timestamp):
 
 @tools_router.post("/gex/api/gex-data")
 @limiter.limit(API_RATE_LIMIT)
-async def gex_data(request: Request, data: GexRequest):
+async def gex_data(request: Request, data: GexRequest, session: dict = Depends(check_session_validity)):
     """Get GEX data for all strikes."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -205,10 +199,9 @@ async def gex_data(request: Request, data: GexRequest):
 
 @tools_router.post("/ivchart/api/iv-data")
 @limiter.limit(API_RATE_LIMIT)
-async def iv_data(request: Request, data: IVChartRequest):
+async def iv_data(request: Request, data: IVChartRequest, session: dict = Depends(check_session_validity)):
     """Get intraday IV time series for ATM CE and PE options."""
     try:
-        session = get_session_data(request)
         broker = session.get("broker")
         if not broker:
             return JSONResponse({"status": "error", "message": "Broker not set in session"}, status_code=400)
@@ -255,10 +248,9 @@ async def iv_data(request: Request, data: IVChartRequest):
 
 @tools_router.post("/ivchart/api/default-symbols")
 @limiter.limit(API_RATE_LIMIT)
-async def default_symbols(request: Request, data: GexRequest):
+async def default_symbols(request: Request, data: GexRequest, session: dict = Depends(check_session_validity)):
     """Get ATM CE and PE symbol names for the given underlying and expiry."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -289,10 +281,9 @@ async def default_symbols(request: Request, data: GexRequest):
 
 @tools_router.get("/ivchart/api/intervals")
 @limiter.limit(API_RATE_LIMIT)
-async def ivchart_intervals(request: Request):
+async def ivchart_intervals(request: Request, session: dict = Depends(check_session_validity)):
     """Get broker-supported intraday intervals."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -321,10 +312,9 @@ async def ivchart_intervals(request: Request):
 
 @tools_router.post("/ivsmile/api/iv-smile-data")
 @limiter.limit(API_RATE_LIMIT)
-async def iv_smile_data(request: Request, data: IVSmileRequest):
+async def iv_smile_data(request: Request, data: IVSmileRequest, session: dict = Depends(check_session_validity)):
     """Get IV Smile data for all strikes."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -371,10 +361,9 @@ async def iv_smile_data(request: Request, data: IVSmileRequest):
 
 @tools_router.post("/oiprofile/api/profile-data")
 @limiter.limit(API_RATE_LIMIT)
-async def profile_data(request: Request, data: OIProfileRequest):
+async def profile_data(request: Request, data: OIProfileRequest, session: dict = Depends(check_session_validity)):
     """Get OI Profile data (futures candles + OI + OI change)."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -427,10 +416,9 @@ async def profile_data(request: Request, data: OIProfileRequest):
 
 @tools_router.get("/oiprofile/api/intervals")
 @limiter.limit(API_RATE_LIMIT)
-async def oiprofile_intervals(request: Request):
+async def oiprofile_intervals(request: Request, session: dict = Depends(check_session_validity)):
     """Get broker-supported intervals filtered to 1m, 5m, 15m."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -456,10 +444,9 @@ async def oiprofile_intervals(request: Request):
 
 @tools_router.post("/oitracker/api/oi-data")
 @limiter.limit(API_RATE_LIMIT)
-async def oi_data(request: Request, data: OITrackerRequest):
+async def oi_data(request: Request, data: OITrackerRequest, session: dict = Depends(check_session_validity)):
     """Get Open Interest data for all strikes."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -502,10 +489,9 @@ async def oi_data(request: Request, data: OITrackerRequest):
 
 @tools_router.post("/oitracker/api/maxpain")
 @limiter.limit(API_RATE_LIMIT)
-async def maxpain(request: Request, data: OITrackerRequest):
+async def maxpain(request: Request, data: OITrackerRequest, session: dict = Depends(check_session_validity)):
     """Calculate Max Pain for an underlying/expiry."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -552,10 +538,9 @@ async def maxpain(request: Request, data: OITrackerRequest):
 
 @tools_router.post("/straddle/api/straddle-data")
 @limiter.limit(API_RATE_LIMIT)
-async def straddle_data(request: Request, data: StraddleRequest):
+async def straddle_data(request: Request, data: StraddleRequest, session: dict = Depends(check_session_validity)):
     """Get Dynamic ATM Straddle time series for charting."""
     try:
-        session = get_session_data(request)
         broker = session.get("broker")
         if not broker:
             return JSONResponse({"status": "error", "message": "Broker not set in session"}, status_code=400)
@@ -602,10 +587,9 @@ async def straddle_data(request: Request, data: StraddleRequest):
 
 @tools_router.get("/straddle/api/intervals")
 @limiter.limit(API_RATE_LIMIT)
-async def straddle_intervals(request: Request):
+async def straddle_intervals(request: Request, session: dict = Depends(check_session_validity)):
     """Get broker-supported intervals for the straddle chart."""
     try:
-        session = get_session_data(request)
         api_key, error = _get_api_key(session)
         if error:
             return error
@@ -624,10 +608,9 @@ async def straddle_intervals(request: Request):
 
 @tools_router.post("/volsurface/api/surface-data")
 @limiter.limit(API_RATE_LIMIT)
-async def surface_data(request: Request, data: VolSurfaceRequest):
+async def surface_data(request: Request, data: VolSurfaceRequest, session: dict = Depends(check_session_validity)):
     """Get 3D volatility surface data across strikes and expiries."""
     try:
-        session = get_session_data(request)
         broker = session.get("broker")
         if not broker:
             return JSONResponse({"status": "error", "message": "Broker not set in session"}, status_code=400)
@@ -821,13 +804,9 @@ async def detailed_health_check(request: Request):
 
 @tools_router.get("/health/api/current")
 @limiter.limit("60/minute")
-async def get_current_metrics(request: Request):
+async def get_current_metrics(request: Request, session: dict = Depends(check_session_validity)):
     """Get current metrics snapshot"""
     try:
-        session = get_session_data(request)
-        if not session.get("user"):
-            return JSONResponse({"status": "error", "message": "Authentication required"}, status_code=401)
-
         metric = HealthMetric.get_current_metrics()
         if not metric:
             return JSONResponse({"error": "No metrics available"}, status_code=404)
@@ -875,13 +854,9 @@ async def get_current_metrics(request: Request):
 
 @tools_router.get("/health/api/history")
 @limiter.limit("60/minute")
-async def get_metrics_history(request: Request, hours: int = Query(default=24, ge=1, le=168)):
+async def get_metrics_history(request: Request, hours: int = Query(default=24, ge=1, le=168), session: dict = Depends(check_session_validity)):
     """Get metrics history"""
     try:
-        session = get_session_data(request)
-        if not session.get("user"):
-            return JSONResponse({"status": "error", "message": "Authentication required"}, status_code=401)
-
         metrics = HealthMetric.get_metrics_history(hours=hours)
 
         return JSONResponse([
@@ -903,13 +878,9 @@ async def get_metrics_history(request: Request, hours: int = Query(default=24, g
 
 @tools_router.get("/health/api/stats")
 @limiter.limit("60/minute")
-async def get_health_stats(request: Request, hours: int = Query(default=24, ge=1, le=168)):
+async def get_health_stats(request: Request, hours: int = Query(default=24, ge=1, le=168), session: dict = Depends(check_session_validity)):
     """Get aggregated statistics"""
     try:
-        session = get_session_data(request)
-        if not session.get("user"):
-            return JSONResponse({"status": "error", "message": "Authentication required"}, status_code=401)
-
         stats = HealthMetric.get_stats(hours=hours)
         return JSONResponse(stats)
     except Exception as e:
@@ -919,13 +890,9 @@ async def get_health_stats(request: Request, hours: int = Query(default=24, ge=1
 
 @tools_router.get("/health/api/alerts")
 @limiter.limit("60/minute")
-async def get_alerts(request: Request):
+async def get_alerts(request: Request, session: dict = Depends(check_session_validity)):
     """Get active alerts"""
     try:
-        session = get_session_data(request)
-        if not session.get("user"):
-            return JSONResponse({"status": "error", "message": "Authentication required"}, status_code=401)
-
         alerts = HealthAlert.get_active_alerts()
         return JSONResponse([
             {
@@ -949,13 +916,9 @@ async def get_alerts(request: Request):
 
 @tools_router.post("/health/api/alerts/{alert_id}/acknowledge")
 @limiter.limit("30/minute")
-async def acknowledge_alert(request: Request, alert_id: int):
+async def acknowledge_alert(request: Request, alert_id: int, session: dict = Depends(check_session_validity)):
     """Acknowledge an alert"""
     try:
-        session = get_session_data(request)
-        if not session.get("user"):
-            return JSONResponse({"status": "error", "message": "Authentication required"}, status_code=401)
-
         success = HealthAlert.acknowledge_alert(alert_id)
         if success:
             return JSONResponse({"status": "success", "message": "Alert acknowledged"})
@@ -967,13 +930,9 @@ async def acknowledge_alert(request: Request, alert_id: int):
 
 @tools_router.post("/health/api/alerts/{alert_id}/resolve")
 @limiter.limit("30/minute")
-async def resolve_alert(request: Request, alert_id: int):
+async def resolve_alert(request: Request, alert_id: int, session: dict = Depends(check_session_validity)):
     """Resolve an alert"""
     try:
-        session = get_session_data(request)
-        if not session.get("user"):
-            return JSONResponse({"status": "error", "message": "Authentication required"}, status_code=401)
-
         success = HealthAlert.resolve_alert(alert_id)
         if success:
             return JSONResponse({"status": "success", "message": "Alert resolved"})
@@ -985,13 +944,9 @@ async def resolve_alert(request: Request, alert_id: int):
 
 @tools_router.get("/health/export")
 @limiter.limit("10/minute")
-async def export_metrics(request: Request, hours: int = Query(default=24, ge=1, le=168)):
+async def export_metrics(request: Request, hours: int = Query(default=24, ge=1, le=168), session: dict = Depends(check_session_validity)):
     """Export metrics to CSV"""
     try:
-        session = get_session_data(request)
-        if not session.get("user"):
-            return JSONResponse({"status": "error", "message": "Authentication required"}, status_code=401)
-
         metrics = HealthMetric.get_metrics_history(hours=hours)
 
         output = io.StringIO()

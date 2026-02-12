@@ -38,6 +38,7 @@ from routers.settings import settings_router
 from routers.strategy import strategy_router
 from routers.system_permissions import system_permissions_router
 from routers.telegram import telegram_router
+from routers.tools import tools_router
 from routers.traffic import traffic_router
 from routers.tv_json import tv_json_router
 
@@ -71,6 +72,7 @@ __all__ = [
     "strategy_router",
     "system_permissions_router",
     "telegram_router",
+    "tools_router",
     "traffic_router",
     "tv_json_router",
 ]

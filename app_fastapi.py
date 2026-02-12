@@ -640,6 +640,10 @@ app.include_router(flow_router)
 # Historical data
 app.include_router(historify_router)
 
+# Tools Hub (GEX, IV Chart, IV Smile, OI Profile, OI Tracker, Straddle, Vol Surface, Health)
+from routers.tools import tools_router
+app.include_router(tools_router)
+
 # ============================================================
 # REST API v1 Routers (Task 7.3+)
 # These replace Flask-RESTX namespaces under /api/v1/
