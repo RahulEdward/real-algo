@@ -575,6 +575,7 @@ from routers import (
     strategy_router,
     system_permissions_router,
     telegram_router,
+    tools_router,
     traffic_router,
     tv_json_router,
 )
@@ -639,6 +640,9 @@ app.include_router(flow_router)
 
 # Historical data
 app.include_router(historify_router)
+
+# Tools Hub (GEX, IV Chart, IV Smile, OI Profile, OI Tracker, Straddle, Vol Surface)
+app.include_router(tools_router)
 
 # ============================================================
 # REST API v1 Routers (Task 7.3+)

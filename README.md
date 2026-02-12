@@ -78,6 +78,16 @@ Real-time notifications, order alerts, positions, holdings, and interactive comm
 - **Traffic Monitor**: API usage analytics and error tracking
 - **PnL Tracker**: Real-time profit/loss with interactive charts
 
+### Tools Hub
+Advanced options analytics and visualization tools:
+- **GEX (Gamma Exposure)**: Analyze gamma exposure across strikes
+- **IV Chart**: Historical implied volatility charts with multiple intervals
+- **IV Smile**: Visualize volatility smile across strikes
+- **OI Profile**: Open interest distribution analysis
+- **OI Tracker**: Real-time open interest changes with Max Pain calculation
+- **Straddle Chart**: ATM straddle premium tracking
+- **Vol Surface**: 3D volatility surface visualization
+
 ### Enterprise-Grade Security
 - Argon2 password hashing
 - Fernet symmetric encryption for tokens
