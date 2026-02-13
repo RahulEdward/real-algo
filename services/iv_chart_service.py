@@ -1,4 +1,4 @@
-﻿"""
+"""
 IV Chart Service
 Calculates intraday Implied Volatility time series for option symbols.
 
@@ -148,7 +148,7 @@ def get_iv_chart_data(
         exchange: Underlying exchange (e.g., "NSE_INDEX", "BSE_INDEX")
         expiry_date: Expiry in DDMMMYY format (e.g., "06FEB26")
         interval: Candle interval (e.g., "5m", "1m", "15m")
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
         days: Number of days of history to load (default 1)
 
     Returns:
@@ -428,7 +428,7 @@ def get_default_symbols(underlying, exchange, expiry_date, api_key):
         underlying: Underlying symbol (e.g., "NIFTY")
         exchange: Exchange (e.g., "NSE_INDEX")
         expiry_date: Expiry in DDMMMYY format
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
 
     Returns:
         Tuple of (success, response_dict, status_code)

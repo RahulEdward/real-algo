@@ -1,4 +1,4 @@
-﻿"""
+"""
 Straddle Chart Service
 Computes Dynamic ATM Straddle time series from historical candle data.
 
@@ -109,7 +109,7 @@ def get_straddle_chart_data(
         exchange: Underlying exchange (e.g., "NSE_INDEX", "BSE_INDEX")
         expiry_date: Expiry in DDMMMYY format (e.g., "06FEB26")
         interval: Candle interval (e.g., "1m", "5m")
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
         days: Number of days of history (default 5)
 
     Returns:
@@ -238,7 +238,7 @@ def get_straddle_chart_data(
 
             strike_data[strike] = {"ce": ce_lookup, "pe": pe_lookup}
 
-        # Step 7: Merge ΓÇö walk underlying candles, pick CE/PE from the correct strike
+        # Step 7: Merge G�� walk underlying candles, pick CE/PE from the correct strike
         series = []
         for ts, row in df_underlying.iterrows():
             spot = float(row["close"])

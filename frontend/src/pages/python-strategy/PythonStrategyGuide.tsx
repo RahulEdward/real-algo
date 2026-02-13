@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/accordion'
 
 const sampleStrategy = `"""
-Sample EMA Crossover Strategy using OpenAlgo SDK
+Sample EMA Crossover Strategy using RealAlgo SDK
 This strategy buys when fast EMA crosses above slow EMA
 and sells when fast EMA crosses below slow EMA.
 """
@@ -46,9 +46,9 @@ QUANTITY = 1
 FAST_EMA = 9
 SLOW_EMA = 21
 
-# Initialize OpenAlgo client
+# Initialize RealAlgo client
 client = api(
-    api_key="YOUR_OPENALGO_API_KEY",
+    api_key="YOUR_REALALGO_API_KEY",
     host="http://127.0.0.1:5000"
 )
 
@@ -175,7 +175,7 @@ export default function PythonStrategyGuide() {
             <div className="flex gap-4">
               <Badge className="h-6 w-6 rounded-full flex items-center justify-center shrink-0">1</Badge>
               <div>
-                <p className="font-medium">Install OpenAlgo SDK</p>
+                <p className="font-medium">Install RealAlgo SDK</p>
                 <div className="mt-1 flex items-center gap-2">
                   <code className="bg-muted px-2 py-1 rounded text-sm">pip install openalgo</code>
                   <Button
@@ -203,7 +203,7 @@ export default function PythonStrategyGuide() {
               <div>
                 <p className="font-medium">Write your strategy</p>
                 <p className="text-sm text-muted-foreground">
-                  Create a Python file (.py) with your trading logic using the OpenAlgo SDK
+                  Create a Python file (.py) with your trading logic using the RealAlgo SDK
                 </p>
               </div>
             </div>
@@ -839,12 +839,12 @@ pip install -r requirements.txt`}
         </CardContent>
       </Card>
 
-      {/* OpenAlgo SDK Reference */}
+      {/* RealAlgo SDK Reference */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Code className="h-5 w-5" />
-            OpenAlgo SDK Quick Reference
+            RealAlgo SDK Quick Reference
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

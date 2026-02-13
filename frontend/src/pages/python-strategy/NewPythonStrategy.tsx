@@ -12,8 +12,9 @@ import { Label } from '@/components/ui/label'
 import { SCHEDULE_DAYS } from '@/types/python-strategy'
 
 const EXAMPLE_STRATEGY = `"""
-Example OpenAlgo Strategy
-This is a minimal example showing how to use the OpenAlgo Python SDK.
+Example RealAlgo Strategy
+This is a minimal example showing how to use the RealAlgo Python SDK.
+Note: The SDK package is called 'openalgo' on PyPI.
 """
 
 import os
@@ -21,7 +22,7 @@ import time
 from openalgo import api
 
 # Get API key from environment variable
-API_KEY = os.getenv('OPENALGO_API_KEY')
+API_KEY = os.getenv('REALALGO_API_KEY')
 
 # Initialize the API client
 client = api(
@@ -178,7 +179,7 @@ export default function NewPythonStrategy() {
         <Info className="h-4 w-4" />
         <AlertDescription>
           Your Python script should use the <code className="bg-muted px-1 rounded">openalgo</code>{' '}
-          SDK. Install it with: <code className="bg-muted px-1 rounded">pip install openalgo</code>
+          SDK (PyPI package name). Install it with: <code className="bg-muted px-1 rounded">pip install openalgo</code>
         </AlertDescription>
       </Alert>
 

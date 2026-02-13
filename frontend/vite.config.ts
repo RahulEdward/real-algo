@@ -33,6 +33,10 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
+      '/search': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
       '/gex': {
         target: 'http://localhost:5000',
         changeOrigin: true,

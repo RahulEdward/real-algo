@@ -688,8 +688,8 @@ async def simple_health(request: Request):
             {
                 "status": health_status["status"],
                 "version": "1.0",
-                "serviceId": "openalgo",
-                "description": "OpenAlgo Trading Platform",
+                "serviceId": "realalgo",
+                "description": "RealAlgo Trading Platform",
             },
             status_code=status_code,
         )
@@ -782,8 +782,8 @@ async def detailed_health_check(request: Request):
             {
                 "status": overall_status,
                 "version": "1.0",
-                "serviceId": "openalgo",
-                "description": "OpenAlgo Trading Platform",
+                "serviceId": "realalgo",
+                "description": "RealAlgo Trading Platform",
                 "checks": checks,
             },
             status_code=status_code,
@@ -795,7 +795,7 @@ async def detailed_health_check(request: Request):
             {
                 "status": "fail",
                 "version": "1.0",
-                "serviceId": "openalgo",
+                "serviceId": "realalgo",
                 "description": str(e),
             },
             status_code=503,

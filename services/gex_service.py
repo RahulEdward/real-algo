@@ -31,7 +31,7 @@ def get_gex_data(
         underlying: Underlying symbol (e.g., NIFTY, BANKNIFTY)
         exchange: Exchange (NFO, BFO)
         expiry_date: Expiry in DDMMMYY format
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
 
     Returns:
         Tuple of (success, response_data, status_code)

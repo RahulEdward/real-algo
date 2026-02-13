@@ -1,4 +1,4 @@
-﻿"""
+"""
 OI Profile Service
 Combines futures candlestick data with options Open Interest profile.
 
@@ -47,7 +47,9 @@ def _find_futures_symbol(
         expiry_formatted = f"{expiry_date[:2]}-{expiry_date[2:5]}-{expiry_date[5:]}".upper()
 
         # Search for futures contract matching this expiry
+        # Use both underlying (name field) and query (symbol search) for better matching
         futures = fno_search_symbols(
+            query=underlying,  # Also search in symbol field
             underlying=underlying,
             exchange=exchange,
             instrumenttype="FUT",
@@ -56,25 +58,46 @@ def _find_futures_symbol(
         )
 
         if not futures:
+            # Try with just query (symbol search) if name field doesn't match
+            futures = fno_search_symbols(
+                query=underlying,
+                exchange=exchange,
+                instrumenttype="FUT",
+                expiry=expiry_formatted,
+                limit=1,
+            )
+
+        if not futures:
             # Try without expiry filter to get nearest futures
             futures = fno_search_symbols(
+                query=underlying,
                 underlying=underlying,
                 exchange=exchange,
                 instrumenttype="FUT",
                 limit=10,
             )
-            if not futures:
-                logger.warning(f"No futures contracts found for {underlying} on {exchange}")
-                return None
 
-            # Sort by expiry to get nearest
-            def parse_expiry(exp_str: str) -> datetime:
-                try:
-                    return datetime.strptime(exp_str, "%d-%b-%y")
-                except (ValueError, TypeError):
-                    return datetime.max
+        if not futures:
+            # Last resort: just query without underlying filter
+            futures = fno_search_symbols(
+                query=underlying,
+                exchange=exchange,
+                instrumenttype="FUT",
+                limit=10,
+            )
 
-            futures.sort(key=lambda f: parse_expiry(f.get("expiry", "")))
+        if not futures:
+            logger.warning(f"No futures contracts found for {underlying} on {exchange}")
+            return None
+
+        # Sort by expiry to get nearest
+        def parse_expiry(exp_str: str) -> datetime:
+            try:
+                return datetime.strptime(exp_str, "%d-%b-%y")
+            except (ValueError, TypeError):
+                return datetime.max
+
+        futures.sort(key=lambda f: parse_expiry(f.get("expiry", "")))
 
         return {"symbol": futures[0]["symbol"], "exchange": futures[0]["exchange"]}
     except Exception as e:
@@ -95,7 +118,7 @@ def _fetch_daily_oi_changes(
     Args:
         option_symbols: List of dicts with 'symbol' key
         options_exchange: Exchange for options (NFO, BFO)
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
 
     Returns:
         Dict mapping symbol -> previous_day_oi
@@ -182,7 +205,7 @@ def get_oi_profile_data(
         expiry_date: Expiry in DDMMMYY format
         interval: Candle interval (1m, 5m, 15m)
         days: Number of days for futures candles
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
 
     Returns:
         Tuple of (success, response_data, status_code)

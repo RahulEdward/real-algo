@@ -21,7 +21,7 @@ interface UseOptionChainPollingState {
  * Hook for polling option chain data from REST API.
  * Supports page visibility to pause polling when tab is hidden.
  *
- * @param apiKey - OpenAlgo API key
+ * @param apiKey - RealAlgo API key
  * @param underlying - Underlying symbol (NIFTY, BANKNIFTY, etc.)
  * @param exchange - Exchange code (NSE_INDEX, BSE_INDEX)
  * @param expiryDate - Expiry date in DDMMMYY format

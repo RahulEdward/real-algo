@@ -1,4 +1,4 @@
-﻿"""
+"""
 OI Tracker Service
 
 Provides Open Interest data aggregation and Max Pain calculation
@@ -32,17 +32,21 @@ def _get_nearest_futures_price(
         underlying: Base symbol (e.g., NIFTY, BANKNIFTY)
         exchange: Options exchange (NFO, BFO, etc.)
         expiry_date: Expiry in DDMMMYY format (e.g., 30JAN26)
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
 
     Returns:
         Futures LTP or None if not found
     """
     try:
+        from datetime import datetime
+
         # Convert DDMMMYY to DD-MMM-YY for database lookup
         expiry_formatted = f"{expiry_date[:2]}-{expiry_date[2:5]}-{expiry_date[5:]}".upper()
 
         # Search for futures contract matching this expiry
+        # Use both underlying (name field) and query (symbol search) for better matching
         futures = fno_search_symbols(
+            query=underlying,  # Also search in symbol field
             underlying=underlying,
             exchange=exchange,
             instrumenttype="FUT",
@@ -51,27 +55,46 @@ def _get_nearest_futures_price(
         )
 
         if not futures:
+            # Try with just query (symbol search) if name field doesn't match
+            futures = fno_search_symbols(
+                query=underlying,
+                exchange=exchange,
+                instrumenttype="FUT",
+                expiry=expiry_formatted,
+                limit=1,
+            )
+
+        if not futures:
             # Try without expiry filter to get nearest futures
             futures = fno_search_symbols(
+                query=underlying,
                 underlying=underlying,
                 exchange=exchange,
                 instrumenttype="FUT",
                 limit=10,
             )
-            if not futures:
-                logger.warning(f"No futures contracts found for {underlying} on {exchange}")
-                return None
 
-            # Sort by expiry to get nearest
-            from datetime import datetime
+        if not futures:
+            # Last resort: just query without underlying filter
+            futures = fno_search_symbols(
+                query=underlying,
+                exchange=exchange,
+                instrumenttype="FUT",
+                limit=10,
+            )
 
-            def parse_expiry(exp_str: str) -> datetime:
-                try:
-                    return datetime.strptime(exp_str, "%d-%b-%y")
-                except (ValueError, TypeError):
-                    return datetime.max
+        if not futures:
+            logger.warning(f"No futures contracts found for {underlying} on {exchange}")
+            return None
 
-            futures.sort(key=lambda f: parse_expiry(f.get("expiry", "")))
+        # Sort by expiry to get nearest
+        def parse_expiry(exp_str: str) -> datetime:
+            try:
+                return datetime.strptime(exp_str, "%d-%b-%y")
+            except (ValueError, TypeError):
+                return datetime.max
+
+        futures.sort(key=lambda f: parse_expiry(f.get("expiry", "")))
 
         fut_symbol = futures[0]["symbol"]
         fut_exchange = futures[0]["exchange"]
@@ -105,7 +128,7 @@ def get_oi_data(
         underlying: Underlying symbol (e.g., NIFTY, BANKNIFTY)
         exchange: Exchange (NSE_INDEX, BSE_INDEX, NFO, BFO)
         expiry_date: Expiry in DDMMMYY format
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
 
     Returns:
         Tuple of (success, response_data, status_code)
@@ -220,7 +243,7 @@ def calculate_max_pain(
         underlying: Underlying symbol
         exchange: Exchange
         expiry_date: Expiry in DDMMMYY format
-        api_key: OpenAlgo API key
+        api_key: RealAlgo API key
 
     Returns:
         Tuple of (success, response_data, status_code)
