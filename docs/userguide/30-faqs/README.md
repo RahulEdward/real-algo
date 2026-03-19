@@ -278,9 +278,7 @@ If your strategy consistently places over 10 orders per second, you may need for
 RealAlgo is community-driven. Get help through:
 
 1. Documentation: [https://docs.realalgo.in](https://docs.realalgo.in)
-2. Discord Community: [http://realalgo.in/discord](http://realalgo.in/discord)
-3. GitHub Issues: [https://github.com/marketcalls/realalgo/issues](https://github.com/marketcalls/realalgo/issues)
-4. YouTube tutorials: For video guides
+2. GitHub Issues: [https://github.com/marketcalls/realalgo/issues](https://github.com/marketcalls/realalgo/issues)
 
 ### How do I report a bug?
 

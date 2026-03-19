@@ -348,9 +348,7 @@ sudo rm -rf /var/lib/docker
 ### Getting Help
 
 - **Documentation**: https://docs.realalgo.in
-- **Discord Community**: https://discord.com/invite/UPh7QPsNhP
 - **GitHub Issues**: https://github.com/marketcalls/realalgo/issues
-- **YouTube Tutorials**: https://youtube.com/@realalgoHQ
 - **Website**: https://realalgo.in
 
 ### Supported Brokers
@@ -488,4 +486,4 @@ For production deployments, we strongly recommend:
 4. Keeping the system updated
 5. Using Cloudflare or similar CDN/DDoS protection
 
-**Need help?** Join our [Discord community](https://discord.com/invite/UPh7QPsNhP) for support and discussions!
+**Need help?** Check our documentation at https://docs.realalgo.in or open a GitHub issue for support!

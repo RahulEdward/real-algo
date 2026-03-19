@@ -73,13 +73,10 @@ This guide takes you from zero to automated trading, covering everything from ba
 
 - **Developer Documentation**: See `/design` folder for technical architecture
 - **Official Docs**: [docs.realalgo.in](https://docs.realalgo.in)
-- **Community**: [Discord](https://www.realalgo.in/discord)
-- **Video Tutorials**: [YouTube](https://www.youtube.com/@realalgo)
 
 ## Support
 
 If you encounter issues:
 1. Check [Troubleshooting](./29-troubleshooting/README.md)
 2. Read [FAQs](./30-faqs/README.md)
-3. Ask on [Discord](https://www.realalgo.in/discord)
-4. Open a [GitHub Issue](https://github.com/marketcalls/realalgo/issues)
+3. Open a [GitHub Issue](https://github.com/marketcalls/realalgo/issues)
