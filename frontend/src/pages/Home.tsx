@@ -1,6 +1,7 @@
 import {
   BookOpen,
   ClipboardList,
+  Download,
   HelpCircle,
   LogIn,
   Menu,
@@ -76,6 +77,14 @@ export default function Home() {
                     <HelpCircle className="h-5 w-5" />
                     FAQ
                   </Link>
+                  <Link
+                    to="/download"
+                    className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Download className="h-5 w-5" />
+                    Download
+                  </Link>
                   <a
                     href="https://realalgo.in/discord"
                     target="_blank"
@@ -134,6 +143,9 @@ export default function Home() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            <Link to="/download">
+              <Button size="sm">Download</Button>
+            </Link>
             <Button
               variant="ghost"
               size="icon"
@@ -164,6 +176,12 @@ export default function Home() {
                 <Link to="/login">
                   <LogIn className="mr-2 h-5 w-5" />
                   Login
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/download">
+                  <Download className="mr-2 h-5 w-5" />
+                  Download
                 </Link>
               </Button>
             </div>

@@ -82,6 +82,7 @@ import { Footer } from '@/components/layout/Footer'
 **Features:**
 - Copyright and website link
 - Version badge (fetched from API)
+- Social media links (GitHub, Discord, X, YouTube)
 
 ### FullWidthLayout
 

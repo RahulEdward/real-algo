@@ -536,7 +536,8 @@ If you hit rate limits:
 - Report Issues: https://github.com/marketcalls/realalgo/issues
 
 ### Video Tutorials
-- Check documentation for setup guides
+- Check RealAlgo YouTube channel for video guides
+- GoCharting tutorials for alert setup
 
 ---
 

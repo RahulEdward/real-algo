@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { SocketProvider } from '@/components/socket/SocketProvider'
 import { useAuthStore } from '@/stores/authStore'
+import { Footer } from './Footer'
 import { MobileBottomNav } from './MobileBottomNav'
 import { Navbar } from './Navbar'
 
@@ -25,6 +26,7 @@ export function Layout() {
         <main className="container mx-auto px-4 py-6 pb-24 md:pb-6 flex-1">
           <Outlet />
         </main>
+        <Footer className="hidden md:block" />
         <MobileBottomNav />
       </div>
     </SocketProvider>

@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  ClipboardList,
   Download,
   HelpCircle,
   Menu,
