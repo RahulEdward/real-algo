@@ -188,9 +188,12 @@ def construct_option_symbol(
     base_symbol: str, expiry_date: str, strike: float, option_type: str
 ) -> str:
     """
-    Construct option symbol in RealAlgo format.
+    Look up the actual option symbol from the database, falling back to
+    constructing it in DDMMMYY format if not found.
 
-    Format: [Base Symbol][Expiry Date][Strike Price][Option Type]
+    Different brokers store symbols in different date formats (e.g., Fyers uses
+    YYMMMDD while others use DDMMMYY). This function queries the DB first to
+    get the broker-specific symbol format.
 
     Args:
         base_symbol: Base symbol like "NIFTY", "BANKNIFTY", "RELIANCE"
@@ -199,20 +202,35 @@ def construct_option_symbol(
         option_type: "CE" or "PE"
 
     Returns:
-        Option symbol like "NIFTY28OCT2523500CE" or "VEDL25APR24292.5CE"
-
-    Examples:
-        construct_option_symbol("NIFTY", "28MAR24", 20800, "CE") -> "NIFTY28MAR2420800CE"
-        construct_option_symbol("VEDL", "25APR24", 292.5, "CE") -> "VEDL25APR24292.5CE"
+        Option symbol like "NIFTY26MAR2423000CE" (actual DB format)
     """
-    # Format strike: Remove .0 if it's a whole number, otherwise keep decimal
+    # Convert expiry from DDMMMYY to DD-MMM-YY for DB lookup
+    expiry_formatted = f"{expiry_date[:2]}-{expiry_date[2:5]}-{expiry_date[5:]}".upper()
+
+    # Try to find the actual symbol from the database
+    record = (
+        db_session.query(SymToken.symbol)
+        .filter(
+            SymToken.symbol.like(f"{base_symbol}%{option_type.upper()}"),
+            SymToken.expiry == expiry_formatted,
+            SymToken.strike == strike,
+            SymToken.instrumenttype == option_type.upper(),
+        )
+        .first()
+    )
+
+    if record:
+        logger.debug(f"Found option symbol in DB: {record.symbol}")
+        return record.symbol
+
+    # Fallback: construct symbol in DDMMMYY format
     if strike == int(strike):
         strike_str = str(int(strike))
     else:
         strike_str = str(strike)
 
     option_symbol = f"{base_symbol}{expiry_date}{strike_str}{option_type.upper()}"
-    logger.info(f"Constructed option symbol: {option_symbol}")
+    logger.info(f"Constructed option symbol (fallback): {option_symbol}")
     return option_symbol
 
 
@@ -310,10 +328,10 @@ def get_available_strikes(
         # e.g., "28OCT25" -> "28-OCT-25"
         expiry_formatted = f"{expiry_date[:2]}-{expiry_date[2:5]}-{expiry_date[5:]}"
 
-        # Construct symbol pattern: BASE + EXPIRY (without hyphens) + % wildcard
-        # e.g., "NIFTY" + "18NOV25" + "%" = "NIFTY18NOV25%"
-        expiry_no_hyphen = expiry_date.upper()  # Already in DDMMMYY format
-        symbol_pattern = f"{base_symbol}{expiry_no_hyphen}%{option_type.upper()}"
+        # Use base_symbol + wildcard + option_type pattern
+        # Don't embed expiry in LIKE pattern since brokers use different date formats
+        # in symbols (DDMMMYY vs YYMMMDD). The expiry column filter handles date matching.
+        symbol_pattern = f"{base_symbol}%{option_type.upper()}"
 
         # Query database for all strikes matching the criteria
         # Using LIKE to match symbol pattern and filter by exchange and instrumenttype

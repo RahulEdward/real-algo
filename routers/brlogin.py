@@ -57,7 +57,9 @@ async def broker_callback(broker: str, request: Request):
             logger.warning(f"User not in session for {broker} callback, redirecting to login")
             return RedirectResponse(url="/auth/login", status_code=302)
 
-    if session.get("logged_in"):
+    # Don't short-circuit if there's a new auth code — allow re-authentication
+    # so the user gets a fresh access token from the broker
+    if session.get("logged_in") and not request.query_params:
         session["broker"] = broker
         return RedirectResponse(url="/dashboard", status_code=302)
 

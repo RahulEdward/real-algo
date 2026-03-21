@@ -1,4 +1,4 @@
-﻿"""
+"""
 Health Monitoring Database
 
 Tracks infrastructure-level health metrics:
@@ -73,7 +73,7 @@ class HealthMetric(HealthBase):
 
     # Database Connections
     db_connections_total = Column(Integer)
-    db_connections = Column(JSON)  # {"openalgo": 2, "logs": 1, ...}
+    db_connections = Column(JSON)  # {"realalgo": 2, "logs": 1, ...}
     db_status = Column(String(20))  # pass | warn | fail
 
     # WebSocket Connections

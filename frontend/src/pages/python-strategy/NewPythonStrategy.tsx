@@ -14,12 +14,12 @@ import { SCHEDULE_DAYS } from '@/types/python-strategy'
 const EXAMPLE_STRATEGY = `"""
 Example RealAlgo Strategy
 This is a minimal example showing how to use the RealAlgo Python SDK.
-Note: The SDK package is called 'openalgo' on PyPI.
+Note: The SDK package is called 'realalgo' on PyPI.
 """
 
 import os
 import time
-from openalgo import api
+from realalgo import api
 
 # Get API key from environment variable
 API_KEY = os.getenv('REALALGO_API_KEY')
@@ -178,8 +178,8 @@ export default function NewPythonStrategy() {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Your Python script should use the <code className="bg-muted px-1 rounded">openalgo</code>{' '}
-          SDK (PyPI package name). Install it with: <code className="bg-muted px-1 rounded">pip install openalgo</code>
+          Your Python script should use the <code className="bg-muted px-1 rounded">realalgo</code>{' '}
+          SDK (PyPI package name). Install it with: <code className="bg-muted px-1 rounded">pip install realalgo</code>
         </AlertDescription>
       </Alert>
 

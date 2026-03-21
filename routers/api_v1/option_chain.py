@@ -47,6 +47,10 @@ async def option_chain_endpoint(request: Request):
             strike_count=strike_count,
             api_key=api_key,
         )
+        logger.info(f"Option chain response: success={success}, status_code={status_code}")
+        # Avoid returning 404 for "no data" scenarios as it gets confused with "route not found"
+        if not success and status_code == 404:
+            status_code = 422
         return JSONResponse(content=response, status_code=status_code)
     except Exception as e:
         logger.exception(f"Unexpected error in option chain endpoint: {e}")

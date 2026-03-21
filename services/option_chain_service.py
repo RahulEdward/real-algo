@@ -143,21 +143,53 @@ def get_option_symbols_for_chain(
         ce_label = strike_info["ce_label"]
         pe_label = strike_info["pe_label"]
 
-        # Construct symbol names
-        ce_symbol = construct_option_symbol(base_symbol, expiry_date, strike, "CE")
-        pe_symbol = construct_option_symbol(base_symbol, expiry_date, strike, "PE")
-
-        # Query database for both CE and PE
+        # Query database by expiry, strike, instrumenttype, and exchange
+        # instead of constructing symbol names (which vary by broker format)
         ce_record = (
             db_session.query(SymToken)
-            .filter(SymToken.symbol == ce_symbol, SymToken.exchange == exchange)
+            .filter(
+                SymToken.symbol.like(f"{base_symbol}%CE"),
+                SymToken.expiry == expiry_formatted,
+                SymToken.strike == strike,
+                SymToken.instrumenttype == "CE",
+                SymToken.exchange == exchange,
+            )
             .first()
         )
 
         pe_record = (
             db_session.query(SymToken)
-            .filter(SymToken.symbol == pe_symbol, SymToken.exchange == exchange)
+            .filter(
+                SymToken.symbol.like(f"{base_symbol}%PE"),
+                SymToken.expiry == expiry_formatted,
+                SymToken.strike == strike,
+                SymToken.instrumenttype == "PE",
+                SymToken.exchange == exchange,
+            )
             .first()
+        )
+
+        ce_symbol = ce_record.symbol if ce_record else construct_option_symbol(base_symbol, expiry_date, strike, "CE")
+        pe_symbol = pe_record.symbol if pe_record else construct_option_symbol(base_symbol, expiry_date, strike, "PE")
+
+        chain_symbols.append(
+            {
+                "strike": strike,
+                "ce": {
+                    "symbol": ce_symbol,
+                    "label": ce_label,
+                    "exists": ce_record is not None,
+                    "lotsize": ce_record.lotsize if ce_record else None,
+                    "tick_size": ce_record.tick_size if ce_record else None,
+                },
+                "pe": {
+                    "symbol": pe_symbol,
+                    "label": pe_label,
+                    "exists": pe_record is not None,
+                    "lotsize": pe_record.lotsize if pe_record else None,
+                    "tick_size": pe_record.tick_size if pe_record else None,
+                },
+            }
         )
 
         chain_symbols.append(

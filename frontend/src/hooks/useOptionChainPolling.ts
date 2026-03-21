@@ -86,7 +86,16 @@ export function useOptionChainPolling(
       })
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        // Try to extract error message from response body
+        try {
+          const errorData = await response.json()
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+        } catch (parseError) {
+          if (parseError instanceof Error && !parseError.message.startsWith('HTTP error')) {
+            throw parseError
+          }
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
       }
 
       const data: OptionChainResponse = await response.json()

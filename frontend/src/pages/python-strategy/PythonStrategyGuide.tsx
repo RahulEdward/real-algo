@@ -36,7 +36,7 @@ This strategy buys when fast EMA crosses above slow EMA
 and sells when fast EMA crosses below slow EMA.
 """
 
-from openalgo import api
+from realalgo import api
 import time
 
 # Configuration
@@ -177,11 +177,11 @@ export default function PythonStrategyGuide() {
               <div>
                 <p className="font-medium">Install RealAlgo SDK</p>
                 <div className="mt-1 flex items-center gap-2">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">pip install openalgo</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">pip install realalgo</code>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyToClipboard('pip install openalgo')}
+                    onClick={() => copyToClipboard('pip install realalgo')}
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
@@ -778,7 +778,7 @@ export default function PythonStrategyGuide() {
                         <pre className="bg-muted p-2 rounded mt-1 text-xs overflow-x-auto">
 {`[project]
 dependencies = [
-    "openalgo",
+    "realalgo",
     "TA-Lib",        # Add your library here
     "pandas-ta",
 ]`}
@@ -803,7 +803,7 @@ dependencies = [
                       <li>
                         Add your library:
                         <pre className="bg-muted p-2 rounded mt-1 text-xs overflow-x-auto">
-{`openalgo
+{`realalgo
 TA-Lib
 pandas-ta`}
                         </pre>

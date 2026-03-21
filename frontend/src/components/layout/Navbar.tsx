@@ -154,7 +154,7 @@ export function Navbar() {
         {/* Logo */}
         <Link to="/dashboard" className="flex items-center gap-2 mr-6">
           <img src="/logo.png" alt="RealAlgo" className="h-8 w-8" />
-          <span className="hidden font-semibold sm:inline-block">OpenAlgo</span>
+          <span className="hidden font-semibold sm:inline-block">RealAlgo</span>
         </Link>
 
         {/* Desktop Navigation */}
