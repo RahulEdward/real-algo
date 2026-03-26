@@ -94,12 +94,9 @@ def parse_option_symbol(
     """
     Parse option symbol to extract underlying, expiry, strike, and option type
 
-    Format: SYMBOL[DD][MMM][YY][STRIKE][CE/PE]
-    Examples:
-        NFO: NIFTY28NOV2424000CE, RELIANCE28NOV241500PE
-        BFO: SENSEX28NOV24100000CE
-        CDS: USDINR28NOV2483.50CE
-        MCX: GOLD28NOV2472000CE
+    Supports both DDMMMYY and YYMMMDD date formats in symbols:
+        DDMMMYY: NIFTY28NOV2424000CE (day=28, month=NOV, year=24)
+        YYMMMDD: NIFTY26MAR3023300CE (year=26, month=MAR, day=30)
 
     Args:
         symbol: Option symbol
@@ -113,14 +110,13 @@ def parse_option_symbol(
         opt_type: CE or PE
     """
     try:
-        # Pattern: SYMBOL + DD + MMM + YY + STRIKE + CE/PE
-        # Strike can have decimal point for currencies
+        # Pattern: SYMBOL + 2digits + 3letter_month + 2digits + STRIKE + CE/PE
         match = re.match(r"([A-Z]+)(\d{2})([A-Z]{3})(\d{2})([\d.]+)(CE|PE)", symbol.upper())
 
         if not match:
             raise ValueError(f"Invalid option symbol format: {symbol}")
 
-        base_symbol, day, month_str, year, strike_str, opt_type = match.groups()
+        base_symbol, num1, month_str, num2, strike_str, opt_type = match.groups()
 
         # Month mapping
         month_map = {
@@ -138,9 +134,40 @@ def parse_option_symbol(
             "DEC": 12,
         }
 
+        month_num = month_map[month_str]
+        n1 = int(num1)
+        n2 = int(num2)
+
+        # Disambiguate DDMMMYY vs YYMMMDD:
+        # Try both interpretations and pick the one closest to today
+        from datetime import date as _date
+        today = _date.today()
+
+        candidates = []
+
+        # Interpretation 1: DDMMMYY (num1=day, num2=year)
+        try:
+            d1 = _date(2000 + n2, month_num, n1)
+            candidates.append((d1, n1, n2))  # (date, day, year_2digit)
+        except ValueError:
+            pass
+
+        # Interpretation 2: YYMMMDD (num1=year, num2=day)
+        try:
+            d2 = _date(2000 + n1, month_num, n2)
+            candidates.append((d2, n2, n1))  # (date, day, year_2digit)
+        except ValueError:
+            pass
+
+        if not candidates:
+            raise ValueError(f"Cannot parse valid date from symbol: {symbol}")
+
+        # Pick the candidate closest to today (prefer near-term expiry)
+        best = min(candidates, key=lambda c: abs((c[0] - today).days))
+        chosen_date, day, year_2digit = best
+
         # Determine expiry time
         if custom_expiry_time:
-            # Parse custom expiry time (format: "HH:MM")
             try:
                 time_parts = custom_expiry_time.split(":")
                 if len(time_parts) != 2:
@@ -157,10 +184,6 @@ def parse_option_symbol(
             except Exception as e:
                 raise ValueError(f"Failed to parse expiry_time '{custom_expiry_time}': {str(e)}")
         else:
-            # Use default expiry time based on exchange:
-            # NFO/BFO: 15:30 (3:30 PM)
-            # CDS: 12:30 (12:30 PM)
-            # MCX: 23:30 (11:30 PM) - Default, but varies by commodity
             if exchange == "MCX":
                 expiry_hour = 23
                 expiry_minute = 30
@@ -172,11 +195,9 @@ def parse_option_symbol(
                 expiry_minute = 30
 
         expiry = datetime(
-            int("20" + year), month_map[month_str], int(day), expiry_hour, expiry_minute
+            2000 + year_2digit, month_num, day, expiry_hour, expiry_minute
         )
 
-        # Convert strike to proper format
-        # Strike must be in same units as futures price for Black-76
         strike = float(strike_str)
 
         logger.info(

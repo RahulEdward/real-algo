@@ -1,3 +1,4 @@
+import concurrent.futures
 import json
 import os
 import time
@@ -14,19 +15,22 @@ from utils.logging import get_logger
 logger = get_logger(__name__)
 
 
-def get_api_response(endpoint, auth, method="GET", payload=""):
+def get_api_response(endpoint, auth, method="GET", payload="", _retry_count=0):
     """
     Make API requests to Fyers API using shared connection pooling.
+    Automatically retries on 429 (Too Many Requests) with exponential backoff.
 
     Args:
         endpoint: API endpoint (e.g., /api/v2/positions)
         auth: Authentication token
         method: HTTP method (GET, POST, etc.)
         payload: Request payload as a string or dict
+        _retry_count: Internal retry counter (do not set manually)
 
     Returns:
         dict: Parsed JSON response from the API
     """
+    MAX_RETRIES = 3
     try:
         # Get the shared httpx client with connection pooling
         client = get_httpx_client()
@@ -58,6 +62,13 @@ def get_api_response(endpoint, auth, method="GET", payload=""):
 
         # Add status attribute for compatibility
         response.status = response.status_code
+
+        # Retry on 429 with exponential backoff
+        if response.status_code == 429 and _retry_count < MAX_RETRIES:
+            wait_time = (2 ** _retry_count) * 0.5  # 0.5s, 1s, 2s
+            logger.warning(f"Rate limited (429), retrying in {wait_time}s (attempt {_retry_count + 1}/{MAX_RETRIES})")
+            time.sleep(wait_time)
+            return get_api_response(endpoint, auth, method, payload, _retry_count + 1)
 
         # Raise HTTPError for bad responses (4xx, 5xx)
         response.raise_for_status()
@@ -218,6 +229,7 @@ class BrokerData:
         """
         # Convert symbols to broker format and build comma-separated list
         br_symbols = []
+        seen_symbols = set()  # Track seen symbols to avoid duplicates
         symbol_map = {}  # Map br_symbol back to original symbol/exchange
         skipped_symbols = []  # Track symbols that couldn't be resolved
 
@@ -240,6 +252,11 @@ class BrokerData:
                 )
                 continue
 
+            # Skip duplicate symbols to avoid 400 errors from Fyers API
+            if br_symbol in seen_symbols:
+                continue
+            seen_symbols.add(br_symbol)
+
             br_symbols.append(br_symbol)
             symbol_map[br_symbol] = {"symbol": symbol, "exchange": exchange}
 
@@ -261,11 +278,47 @@ class BrokerData:
         )
         logger.debug(f"Fyers quotes API response: {quotes_response}")
 
-        # 2. Fetch depth for OI (bulk bid/ask is buggy, only use OI)
-        depth_response = get_api_response(
-            f"/data/depth?symbol={encoded_symbols}&ohlcv_flag=1", self.auth_token
-        )
-        logger.debug(f"Fyers depth API response: {depth_response}")
+        # 2. Fetch depth for OI - Fyers depth API has issues with bulk derivatives
+        # but may still return OI correctly. Use small batches sequentially.
+        # Fall back to sequential single-symbol calls if batch fails.
+        depth_map = {}
+        DEPTH_BATCH_SIZE = 5
+        DEPTH_BATCH_DELAY = 0.2  # seconds between batches
+
+        for i in range(0, len(br_symbols), DEPTH_BATCH_SIZE):
+            depth_batch = br_symbols[i : i + DEPTH_BATCH_SIZE]
+            depth_symbols_param = ",".join(depth_batch)
+            encoded_depth_symbols = urllib.parse.quote(depth_symbols_param)
+
+            depth_response = get_api_response(
+                f"/data/depth?symbol={encoded_depth_symbols}&ohlcv_flag=1", self.auth_token
+            )
+
+            if depth_response.get("s") == "ok":
+                depth_data = depth_response.get("d", {})
+                if isinstance(depth_data, dict):
+                    depth_map.update(depth_data)
+            else:
+                # Batch failed — fall back to individual calls for this batch
+                logger.debug(
+                    f"Depth batch {i // DEPTH_BATCH_SIZE + 1} failed, falling back to individual calls"
+                )
+                for sym in depth_batch:
+                    encoded = urllib.parse.quote(sym)
+                    resp = get_api_response(
+                        f"/data/depth?symbol={encoded}&ohlcv_flag=1", self.auth_token
+                    )
+                    if resp.get("s") == "ok":
+                        d = resp.get("d", {})
+                        if isinstance(d, dict) and sym in d:
+                            depth_map[sym] = d[sym]
+                    time.sleep(0.1)  # Small delay between individual calls
+
+            # Rate limit delay between batches
+            if i + DEPTH_BATCH_SIZE < len(br_symbols):
+                time.sleep(DEPTH_BATCH_DELAY)
+
+        logger.info(f"Depth API: fetched OI for {len(depth_map)}/{len(br_symbols)} symbols")
 
         # Parse quotes response - array format
         quotes_map = {}
@@ -276,13 +329,6 @@ class BrokerData:
                     quotes_map[symbol_name] = quote_item.get("v", {})
         else:
             logger.warning(f"Quotes API error: {quotes_response.get('message', 'Unknown error')}")
-
-        # Parse depth response - dict format (only for OI)
-        depth_map = {}
-        if depth_response.get("s") == "ok":
-            depth_map = depth_response.get("d", {})
-        else:
-            logger.warning(f"Depth API error: {depth_response.get('message', 'Unknown error')}")
 
         # Build results by merging data from both endpoints
         results = []
